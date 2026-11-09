@@ -30,14 +30,14 @@ test.describe('Blog hub', () => {
     await expect(page.locator('#post-grid .post-card:visible')).toHaveCount(12);
   });
 
-  test('category filters narrow results and Clear filters restores them', async ({ page }) => {
+  test('category filters narrow results and unchecking restores them', async ({ page }) => {
     await page.goto('/squad/blog/');
     const total = await page.locator('#post-grid .post-card').count();
     await page.getByLabel('Release').check();
     const count = await page.locator('#post-grid .post-card:visible').count();
     expect(count).toBeGreaterThan(0);
     expect(count).toBeLessThan(total);
-    await page.getByRole('button', { name: 'Clear filters' }).click();
+    await page.getByRole('checkbox', { name: 'Release' }).uncheck();
     await expect(page.locator('#post-grid .post-card:visible')).toHaveCount(12);
   });
 

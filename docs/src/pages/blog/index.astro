@@ -115,7 +115,6 @@ const count = (key: 'category' | 'author', value: string) => posts.filter((p) =>
                 <label><input type="checkbox" name="author" value={a} /> {a}<span class="count">{count('author', a)}</span></label>
               ))}
             </fieldset>
-            <button type="reset" class="btn btn-sm" id="filters-reset">Clear filters</button>
           </form>
 
           <div>
