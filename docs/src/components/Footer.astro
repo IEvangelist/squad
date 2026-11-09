@@ -66,9 +66,13 @@ const columns = [
       ))}
     </div>
 
-    <div class="border-top mt-4 pt-3 text-center color-fg-muted">
-      <p class="mb-1">MIT License · Built with <a href="https://astro.build" class="text-underline" target="_blank" rel="noopener">Astro</a> and <a href="https://primer.style" class="text-underline" target="_blank" rel="noopener">Primer</a></p>
-      <p class="f6">v{__VERSION__} · {(__COMMIT_SHA__ as string).slice(0, 7)} · {__BUILD_DATE__}</p>
+    <div class="footer-meta">
+      <p class="mb-0">MIT License · Built with <a href="https://astro.build" class="text-underline" target="_blank" rel="noopener">Astro</a> and <a href="https://primer.style" class="text-underline" target="_blank" rel="noopener">Primer</a></p>
+      <ul class="footer-build list-style-none">
+        <li><span class="footer-key">Version</span> v{__VERSION__}</li>
+        <li><span class="footer-key">Commit</span> {(__COMMIT_SHA__ as string).slice(0, 7)}</li>
+        <li><span class="footer-key">Built</span> {__BUILD_DATE__}</li>
+      </ul>
     </div>
   </div>
 </footer>

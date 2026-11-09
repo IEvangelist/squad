@@ -2,6 +2,7 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { remarkRewriteLinks } from './src/plugins/remark-rewrite-links.mjs';
 import { rehypePagefindAttrs } from './src/plugins/rehype-pagefind-attrs.mjs';
+import { rehypeA11y } from './src/plugins/rehype-a11y.mjs';
 import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
@@ -19,7 +20,7 @@ export default defineConfig({
   },
   markdown: {
     remarkPlugins: [remarkRewriteLinks],
-    rehypePlugins: [rehypePagefindAttrs],
+    rehypePlugins: [rehypePagefindAttrs, rehypeA11y],
     shikiConfig: {
       themes: {
         light: 'github-light-high-contrast',
