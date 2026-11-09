@@ -568,10 +568,10 @@ html:has(.search-dialog[open]) { overflow: hidden; scrollbar-gutter: stable; }
 /* ---------- Landing hero spacing ---------- */
 .hero-inner { padding-block: clamp(4rem, 10vw, 8rem); }
 .hero-grid { gap: clamp(3rem, 6vw, 4rem); }
-.hero-grid > div:first-child { max-width: 42rem; }
+.hero-grid > div:first-child { max-width: 40rem; }
 @media (min-width: 768px) { .hero-grid > div:last-child { width: 100%; max-width: 44rem; } }
 @media (min-width: 1012px) {
-  .hero-grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); column-gap: clamp(4rem, 7vw, 7rem); }
+  .hero-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: clamp(3rem, 5vw, 5rem); }
   .hero-grid > div:last-child { margin-inline: 0; max-width: none; }
 }
 .hero .hero-title { margin-bottom: var(--base-size-24); }
