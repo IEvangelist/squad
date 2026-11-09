@@ -5,12 +5,12 @@
  *
  * Usage (from docs/):
  *   npm run build && npm run screenshots
- *   npm run screenshots -- --out screenshots --base http://localhost:4321 --full-height 3200
+ *   npm run screenshots -- --out visual-review --base http://localhost:4321 --full-height 3200
  *
  * Options:
  *   --base         Site origin to capture (default http://localhost:4321). If nothing is listening
  *                  there, `astro preview` is started automatically and stopped afterwards.
- *   --out          Output directory, relative to docs/ (default screenshots). Gitignored.
+ *   --out          Output directory, relative to docs/ (default visual-review). Gitignored; only files this script generates are replaced.
  *   --full-height  Max captured page height in px for full-page shots (default 3200).
  *   --only         Comma-separated layout ids to capture (e.g. home,blog-post).
  */
@@ -26,7 +26,7 @@ const args = Object.fromEntries(
   }, []),
 );
 const BASE = (args.base ?? 'http://localhost:4321').replace(/\/$/, '');
-const OUT = path.resolve(args.out ?? 'screenshots');
+const OUT = path.resolve(args.out ?? 'visual-review');
 const MAX_H = Number(args['full-height'] ?? 3200);
 const ONLY = args.only ? new Set(args.only.split(',')) : null;
 
@@ -114,8 +114,11 @@ async function settle(page) {
 
 async function main() {
   await ensureServer();
-  fs.rmSync(OUT, { recursive: true, force: true });
+  // Only clear files this script generates so a custom --out never deletes unrelated files
   fs.mkdirSync(OUT, { recursive: true });
+  for (const f of fs.readdirSync(OUT)) {
+    if (/__(mobile|tablet|desktop)__(light|dark)\.png$/.test(f) || f === 'index.html') fs.rmSync(path.join(OUT, f));
+  }
 
   const browser = await chromium.launch();
   const manifest = [];

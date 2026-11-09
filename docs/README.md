@@ -112,4 +112,4 @@ Blog posts are automatically discovered and listed on the blog index page.
 
 ## Visual review screenshots
 
-`npm run build && npm run screenshots` captures every layout page (landing, blog index and states, blog post, docs pages, 404, search dialog, mobile drawer) on mobile (390px), tablet (820px) and desktop (1440px) in light and dark mode into `docs/screenshots/` (gitignored) and writes `screenshots/index.html` as a gallery. Options: `--base`, `--out`, `--full-height`, `--only home,blog-post`. It starts `astro preview` itself if nothing is listening, and exits non-zero if any capture logged a console error.
+`npm run build && npm run screenshots` captures every layout page (landing, blog index and states, blog post, docs pages, 404, search dialog, mobile drawer) on mobile (390px), tablet (820px) and desktop (1440px) in light and dark mode into `docs/visual-review/` (gitignored) and writes `visual-review/index.html` as a gallery. Options: `--base`, `--out`, `--full-height`, `--only home,blog-post`. It starts `astro preview` itself if nothing is listening, and exits non-zero if any capture logged a console error.
