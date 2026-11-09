@@ -59,7 +59,7 @@ const editUrl = currentSlug
                     <span>Previous</span>
                     <strong><Icon name="arrow-left" class="mr-1" />{prevPage.title}</strong>
                   </a>
-                ) : <span />}
+                ) : null}
                 {nextPage && (
                   <a href={`${import.meta.env.BASE_URL}docs/${nextPage.slug}/`} rel="next" class="next">
                     <span>Next</span>

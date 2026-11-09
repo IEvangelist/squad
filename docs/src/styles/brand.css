@@ -427,6 +427,8 @@ a.cell:hover .round-arrow { transform: translateX(3px); color: #fff; background:
 
 .pager { display: grid; gap: 1px; background: var(--fx-hairline); border: var(--borderWidth-thin) solid var(--fx-hairline); border-radius: var(--borderRadius-large); overflow: hidden; }
 @media (min-width: 640px) { .pager { grid-template-columns: 1fr 1fr; } }
+/* A lone previous/next link takes the full width */
+.pager:has(> a:only-child) { grid-template-columns: 1fr; }
 .pager a { display: block; padding: var(--base-size-16) var(--base-size-24); background: var(--bgColor-default); color: var(--fgColor-default); text-decoration: none; transition: background-color 0.2s ease; }
 .pager a:hover { background: var(--bgColor-accent-muted); text-decoration: none; }
 .pager a span { display: block; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fgColor-muted); }

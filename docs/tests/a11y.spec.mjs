@@ -118,3 +118,13 @@ test.describe('mobile layout', () => {
     expect(overflow).toBeLessThanOrEqual(0);
   });
 });
+
+test.describe('docs pager', () => {
+  test('a lone next link spans the full width (first page)', async ({ page }) => {
+    await page.goto('/squad/docs/get-started/five-minute-start/');
+    const pager = page.locator('nav.pager');
+    await expect(pager.locator('a')).toHaveCount(1);
+    const [pw, lw] = await Promise.all([pager.evaluate((e) => e.clientWidth), pager.locator('a').evaluate((e) => e.getBoundingClientRect().width)]);
+    expect(lw).toBeGreaterThan(pw - 4);
+  });
+});
