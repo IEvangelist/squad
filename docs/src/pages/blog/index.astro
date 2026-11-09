@@ -75,26 +75,32 @@ const count = (key: 'category' | 'author', value: string) => posts.filter((p) =>
       <section aria-labelledby="all-title">
         <div class="section-head">
           <h2 id="all-title">All posts</h2>
-          <div class="d-flex flex-items-center" style="gap: var(--base-size-16)">
-            <span id="post-count" class="f6 color-fg-muted" role="status" aria-live="polite">{posts.length} posts</span>
-            <label class="d-none d-sm-flex flex-items-center f6 color-fg-muted" style="gap: var(--base-size-8)">
-              Per page
-              <select id="post-size" class="sort-select">
-                <option value="6">6</option>
-                <option value="12" selected>12</option>
-                <option value="24">24</option>
-              </select>
-            </label>
-            <label class="d-flex flex-items-center f6 color-fg-muted" style="gap: var(--base-size-8)">
-              Sort by
-              <select id="post-sort" class="sort-select">
-                <option value="newest">Newest</option>
-                <option value="oldest">Oldest</option>
-              </select>
-            </label>
+          <div class="head-controls">
+            <span id="post-count" class="count-text" role="status" aria-live="polite">{posts.length} posts</span>
+            <div class="dd" data-dd="sort">
+              <span class="dd-label" id="sort-label">Sort by:</span>
+              <button type="button" class="dd-btn" id="post-sort" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="sort-label post-sort-value" data-value="newest">
+                <span id="post-sort-value">Newest</span><Icon name="chevron-down" />
+              </button>
+              <ul class="dd-menu" role="listbox" aria-labelledby="sort-label" tabindex="-1" hidden>
+                <li role="option" tabindex="-1" data-value="newest" aria-selected="true"><span>Newest</span><Icon name="check" /></li>
+                <li role="option" tabindex="-1" data-value="oldest" aria-selected="false"><span>Oldest</span><Icon name="check" /></li>
+              </ul>
+            </div>
+            <span class="head-divider d-none d-sm-block" aria-hidden="true"></span>
+            <div class="dd d-none d-sm-flex" data-dd="size">
+              <span class="dd-label" id="size-label">Posts per page:</span>
+              <button type="button" class="dd-btn" id="post-size" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="size-label post-size-value" data-value="12">
+                <span id="post-size-value">12</span><Icon name="chevron-down" />
+              </button>
+              <ul class="dd-menu" role="listbox" aria-labelledby="size-label" tabindex="-1" hidden>
+                <li role="option" tabindex="-1" data-value="6" aria-selected="false"><span>6</span><Icon name="check" /></li>
+                <li role="option" tabindex="-1" data-value="12" aria-selected="true"><span>12</span><Icon name="check" /></li>
+                <li role="option" tabindex="-1" data-value="24" aria-selected="false"><span>24</span><Icon name="check" /></li>
+              </ul>
+            </div>
           </div>
         </div>
-
         <div class="articles">
           <form class="filters" id="post-filters" aria-label="Filter posts" onsubmit="return false">
             <fieldset>
@@ -151,13 +157,65 @@ const count = (key: 'category' | 'author', value: string) => posts.filter((p) =>
 </BaseLayout>
 
 <script>
+  // Custom listbox dropdown (button + menu) with full keyboard support
+  function setupDropdown(button: HTMLElement, onChange: () => void) {
+    const root = button.closest('.dd') as HTMLElement;
+    const menu = root.querySelector('.dd-menu') as HTMLElement;
+    const valueEl = button.querySelector('span') as HTMLElement;
+    const opts = Array.from(menu.querySelectorAll<HTMLElement>('[role=option]'));
+
+    const close = (focusButton = false) => {
+      menu.hidden = true;
+      button.setAttribute('aria-expanded', 'false');
+      if (focusButton) button.focus();
+    };
+    const open = () => {
+      document.querySelectorAll<HTMLElement>('.dd-menu:not([hidden])').forEach((m) => { m.hidden = true; });
+      menu.hidden = false;
+      button.setAttribute('aria-expanded', 'true');
+      (opts.find((o) => o.getAttribute('aria-selected') === 'true') ?? opts[0]).focus();
+    };
+    const set = (value: string, silent = true) => {
+      opts.forEach((o) => o.setAttribute('aria-selected', String(o.dataset.value === value)));
+      const chosen = opts.find((o) => o.dataset.value === value);
+      if (chosen) { button.dataset.value = value; valueEl.textContent = chosen.querySelector('span')!.textContent; }
+      if (!silent) onChange();
+    };
+
+    button.onclick = () => (menu.hidden ? open() : close());
+    button.onkeydown = (e) => { if (['ArrowDown', 'ArrowUp'].includes(e.key)) { e.preventDefault(); open(); } };
+    opts.forEach((o) => {
+      o.onclick = () => { set(o.dataset.value!, false); close(true); };
+    });
+    menu.onkeydown = (e) => {
+      const i = opts.indexOf(document.activeElement as HTMLElement);
+      if (e.key === 'ArrowDown') { e.preventDefault(); opts[Math.min(i + 1, opts.length - 1)].focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); opts[Math.max(i - 1, 0)].focus(); }
+      else if (e.key === 'Home') { e.preventDefault(); opts[0].focus(); }
+      else if (e.key === 'End') { e.preventDefault(); opts[opts.length - 1].focus(); }
+      else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); (document.activeElement as HTMLElement).click(); }
+      else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(true); }
+      else if (e.key === 'Tab') close();
+    };
+    return { get: () => button.dataset.value ?? '', set };
+  }
+
+  // Registered once: close any open dropdown when clicking elsewhere
+  document.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('.dd')) return;
+    document.querySelectorAll<HTMLElement>('.dd-menu:not([hidden])').forEach((m) => {
+      m.hidden = true;
+      m.closest('.dd')?.querySelector('.dd-btn')?.setAttribute('aria-expanded', 'false');
+    });
+  });
+
   function initBlogHub() {
     const grid = document.getElementById('post-grid');
     if (!grid) return;
     const cards = Array.from(grid.querySelectorAll<HTMLElement>('.post-card'));
     const search = document.getElementById('post-search') as HTMLInputElement;
-    const sort = document.getElementById('post-sort') as HTMLSelectElement;
-    const size = document.getElementById('post-size') as HTMLSelectElement;
+    const sort = setupDropdown(document.getElementById('post-sort')!, () => apply());
+    const size = setupDropdown(document.getElementById('post-size')!, () => apply());
     const form = document.getElementById('post-filters') as HTMLFormElement;
     const status = document.getElementById('post-count');
     const empty = document.getElementById('post-empty');
@@ -171,8 +229,8 @@ const count = (key: 'category' | 'author', value: string) => posts.filter((p) =>
 
     // Restore state from the URL so searches and pages are shareable
     search.value = params.get('q') ?? '';
-    sort.value = params.get('sort') === 'oldest' ? 'oldest' : 'newest';
-    if (['6', '12', '24'].includes(params.get('size') ?? '')) size.value = params.get('size')!;
+    sort.set(params.get('sort') === 'oldest' ? 'oldest' : 'newest');
+    if (['6', '12', '24'].includes(params.get('size') ?? '')) size.set(params.get('size')!);
     (params.get('category') ?? '').split(',').filter(Boolean).forEach((v) => boxes('category').forEach((b) => { if (b.value === v) b.checked = true; }));
     (params.get('author') ?? '').split(',').filter(Boolean).forEach((v) => boxes('author').forEach((b) => { if (b.value === v) b.checked = true; }));
 
@@ -181,8 +239,8 @@ const count = (key: 'category' | 'author', value: string) => posts.filter((p) =>
       if (q) next.set('q', q);
       if (cats.length) next.set('category', cats.join(','));
       if (authors.length) next.set('author', authors.join(','));
-      if (sort.value !== 'newest') next.set('sort', sort.value);
-      if (size.value !== '12') next.set('size', size.value);
+      if (sort.get() !== 'newest') next.set('sort', sort.get());
+      if (size.get() !== '12') next.set('size', size.get());
       if (page > 1) next.set('page', String(page));
       const qs = next.toString();
       history.replaceState(history.state, '', location.pathname + (qs ? `?${qs}` : ''));
@@ -219,7 +277,7 @@ const count = (key: 'category' | 'author', value: string) => posts.filter((p) =>
       const authors = checked('author');
       if (resetPage) page = 1;
 
-      const dir = sort.value === 'oldest' ? 1 : -1;
+      const dir = sort.get() === 'oldest' ? 1 : -1;
       const matches = cards
         .filter(
           (card) =>
@@ -229,7 +287,7 @@ const count = (key: 'category' | 'author', value: string) => posts.filter((p) =>
         )
         .sort((a, b) => dir * (a.dataset.date ?? '').localeCompare(b.dataset.date ?? ''));
 
-      const per = Number(size.value) || 12;
+      const per = Number(size.get()) || 12;
       const pages = Math.max(1, Math.ceil(matches.length / per));
       page = Math.min(page, pages);
       const start = (page - 1) * per;
@@ -251,8 +309,6 @@ const count = (key: 'category' | 'author', value: string) => posts.filter((p) =>
     }
 
     search.oninput = () => apply();
-    sort.onchange = () => apply();
-    size.onchange = () => apply();
     form.onchange = () => apply();
     form.onreset = () => setTimeout(() => { search.value = ''; apply(); });
     apply(false);

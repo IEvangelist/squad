@@ -40,7 +40,8 @@ test.describe('Blog hub', () => {
     expect(await visible.first().locator('.card-title').innerText()).not.toBe(firstTitle);
     await expect(page).toHaveURL(/page=2/);
 
-    await page.locator('#post-size').selectOption('24');
+    await page.locator('#post-size').click();
+    await page.getByRole('option', { name: '24' }).click();
     await expect(visible).toHaveCount(24);
     await expect(page.locator('#post-count')).toContainText('Showing 1–24');
   });
@@ -49,7 +50,8 @@ test.describe('Blog hub', () => {
     await page.goto('/squad/blog/');
     const firstTitle = () => page.locator('#post-grid .post-card:visible .card-title').first().innerText();
     const newest = await firstTitle();
-    await page.locator('#post-sort').selectOption('oldest');
+    await page.locator('#post-sort').click();
+    await page.getByRole('option', { name: 'Oldest' }).click();
     expect(await firstTitle()).not.toBe(newest);
 
     await page.locator('body').click({ position: { x: 5, y: 5 } });
