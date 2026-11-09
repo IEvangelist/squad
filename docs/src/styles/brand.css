@@ -585,3 +585,13 @@ html:has(.search-dialog[open]) { overflow: hidden; scrollbar-gutter: stable; }
 /* Reserve scrollbar space so appearing/disappearing scrollbars never shift content */
 html { scrollbar-gutter: stable; }
 .docs-sidebar, .search-results, .toc { scrollbar-gutter: stable; }
+
+/* ---------- Landing vertical rhythm (matches the generous 112-128px section spacing of the original) ---------- */
+.section-head-block { padding-block: clamp(4rem, 9vw, 7rem) clamp(3rem, 5vw, 4.5rem); }
+.section-block { padding-block: clamp(4rem, 9vw, 7rem); }
+.section-head-gap { margin-bottom: clamp(2.5rem, 5vw, 4rem); }
+.hero + .band .trust { padding-block: var(--base-size-32); }
+.section-head { min-height: 7rem; padding-block: var(--base-size-24); }
+.cta-band { padding-block: clamp(5rem, 11vw, 8rem); }
+.cell { padding: var(--base-size-40); }
+@media (max-width: 767px) { .cell { padding: var(--base-size-24); } }
