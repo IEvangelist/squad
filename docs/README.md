@@ -109,3 +109,7 @@ Blog posts are automatically discovered and listed on the blog index page.
 - UI is built from [Primer](https://primer.style/) classes and design tokens; site-specific rules live in `src/styles/site.css` and use tokens only (no raw colors).
 - Color mode uses Primer's `data-color-mode` (`auto` by default; the toggle stores `light`/`dark` in `localStorage`).
 - `npm run test:e2e` includes axe-core WCAG A/AA checks in light and dark mode (`tests/a11y.spec.mjs`). Start `npm run preview -- --port 4321` first. The API reference specs need generated TypeDoc pages.
+
+## Visual review screenshots
+
+`npm run build && npm run screenshots` captures every layout page (landing, blog index and states, blog post, docs pages, 404, search dialog, mobile drawer) on mobile (390px), tablet (820px) and desktop (1440px) in light and dark mode into `docs/screenshots/` (gitignored) and writes `screenshots/index.html` as a gallery. Options: `--base`, `--out`, `--full-height`, `--only home,blog-post`. It starts `astro preview` itself if nothing is listening, and exits non-zero if any capture logged a console error.
