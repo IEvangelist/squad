@@ -1,6 +1,13 @@
 ---
 import Icon from './Icon.astro';
 const base = import.meta.env.BASE_URL;
+
+const suggestions = [
+  { title: 'Install Squad', path: 'Get Started', href: `${base}docs/get-started/installation/`, icon: '🚀' },
+  { title: 'CLI reference', path: 'Reference', href: `${base}docs/reference/cli/`, icon: '📖' },
+  { title: 'Skills system', path: 'Core Features', href: `${base}docs/features/skills/`, icon: '🧠' },
+  { title: 'What’s new', path: 'Docs', href: `${base}docs/whatsnew/`, icon: '✨' },
+];
 ---
 
 <button
@@ -19,21 +26,44 @@ const base = import.meta.env.BASE_URL;
   <div id="search-backdrop" class="search-backdrop">
     <div class="search-panel">
       <div class="search-input-row">
-        <Icon name="search" class="color-fg-muted" />
+        <Icon name="search" size={20} class="search-icon" />
         <input
           id="search-input"
-          type="search"
+          type="text"
           class="search-input"
-          placeholder="Search documentation..."
+          placeholder="Search the docs and blog…"
           aria-label="Search documentation"
           autocomplete="off"
+          autocapitalize="off"
           spellcheck="false"
         />
+        <span class="search-spinner" id="search-spinner" aria-hidden="true" hidden></span>
         <button type="button" class="btn btn-sm" id="search-close-kbd" aria-label="Close search">Esc</button>
       </div>
-      <div id="search-status" class="px-3 py-2 f6 color-fg-muted border-bottom" role="status" hidden></div>
-      <div id="search-results" class="search-results">
-        <div class="p-5 text-center color-fg-muted" id="search-empty">Start typing to search...</div>
+      <div id="search-status" class="search-status" role="status" aria-live="polite" hidden></div>
+      <div id="search-empty" class="search-empty search-results">
+        <p class="mono-label mb-2">Jump to</p>
+        <ul class="list-style-none">
+          {suggestions.map((s) => (
+            <li>
+              <a href={s.href} class="search-result search-suggestion">
+                <span class="search-glyph" aria-hidden="true">{s.icon}</span>
+                <span class="search-result-main">
+                  <span class="search-result-title">{s.title}</span>
+                  <span class="search-path">{s.path}</span>
+                </span>
+                <Icon name="arrow-right" class="search-enter" />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div id="search-results" class="search-results"></div>
+      <div class="search-footer" aria-hidden="true">
+        <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+        <span><kbd>↵</kbd> open</span>
+        <span><kbd>esc</kbd> close</span>
+        <span class="ml-auto">Search by Pagefind</span>
       </div>
     </div>
   </div>
@@ -63,7 +93,10 @@ const base = import.meta.env.BASE_URL;
     'Reference': 'color-bg-attention-emphasis color-fg-on-emphasis',
     'Blog': 'color-bg-subtle color-fg-default border',
   };
-
+  const SECTION_GLYPH = {
+    'Get Started': '🚀', 'Concepts': '💡', 'Core Features': '🧠', 'Advanced Features': '⚙️', 'Infrastructure': '🏗️',
+    'Guides': '📘', 'Security': '🛡️', 'Scenarios': '🗺️', 'Reference': '📖', 'Blog': '✍️',
+  };
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -75,32 +108,48 @@ const base = import.meta.env.BASE_URL;
     return `<span class="search-badge d-inline-flex f6 text-bold px-2 rounded-2 ${colors}">${escapeHtml(section)}</span>`;
   }
 
+  // Readable breadcrumb from a result URL: /squad/docs/features/skills/ -> features › skills
+  function pathFromUrl(url) {
+    const clean = url.replace(base, '').replace(/^\/+|\/+$/g, '').replace(/\.html$/, '');
+    return clean.split('/').filter((s) => s !== 'docs').join(' › ');
+  }
+
   // --- DOM-dependent state, refreshed on each navigation ---
   let searchBtn, searchModal, searchBackdrop, searchInput,
-      searchResults, searchEmpty, searchCloseBtn, searchStatus;
-  let debounceTimer;
+      searchResults, searchEmpty, searchCloseBtn, searchStatus, searchSpinner;
+  let debounceTimer, searchToken = 0, activeIndex = -1;
 
   // Bound handler refs so we can removeEventListener cleanly
-  let _onBtnClick, _onBackdropClick, _onCloseClick, _onInput, _onDialogClose;
+  let _onBtnClick, _onBackdropClick, _onCloseClick, _onInput, _onDialogClose, _onInputKey, _onResultsKey;
 
+  const options = () => Array.from(searchModal?.querySelectorAll('.search-panel a.search-result') ?? []).filter((el) => !el.closest('[hidden]'));
+
+  // Highlights a result; with focus=true, moves keyboard focus onto it (arrow-key navigation)
+  function setActive(index, focus = false) {
+    const items = options();
+    if (!items.length) { activeIndex = -1; return; }
+    activeIndex = Math.max(0, Math.min(index, items.length - 1));
+    items.forEach((el, i) => el.classList.toggle('is-active', i === activeIndex));
+    const el = items[activeIndex];
+    if (focus) el.focus();
+    el.scrollIntoView({ block: 'nearest' });
+  }
   function openSearch() {
     if (!searchModal || searchModal.open) return;
     searchModal.showModal();
     searchInput?.focus();
+    setActive(0);
   }
 
   function resetSearch() {
+    searchToken++;
     if (searchInput) searchInput.value = '';
-    if (searchResults) {
-      searchResults.innerHTML = '';
-      if (searchEmpty) {
-        searchEmpty.textContent = 'Start typing to search...';
-        searchResults.appendChild(searchEmpty);
-      }
-    }
+    if (searchResults) searchResults.innerHTML = '';
+    if (searchEmpty) searchEmpty.hidden = false;
     if (searchStatus) searchStatus.hidden = true;
+    if (searchSpinner) searchSpinner.hidden = true;
+    setActive(0);
   }
-
   function closeSearch() {
     if (searchModal?.open) searchModal.close();
   }
@@ -112,20 +161,25 @@ const base = import.meta.env.BASE_URL;
       return;
     }
 
+    const token = ++searchToken;
+    if (searchSpinner) searchSpinner.hidden = false;
     try {
       const pf = await loadPagefind();
       const search = await pf.search(query);
-      const results = await Promise.all(search.results.slice(0, 8).map(r => r.data()));
+      const results = await Promise.all(search.results.slice(0, 10).map((r) => r.data()));
+      if (token !== searchToken || !searchResults) return;
 
-      if (!searchResults) return;
       searchResults.innerHTML = '';
+      if (searchEmpty) searchEmpty.hidden = true;
+      if (searchSpinner) searchSpinner.hidden = true;
 
       if (results.length === 0) {
         const noResults = document.createElement('div');
-        noResults.className = 'p-5 text-center color-fg-muted';
-        noResults.textContent = `No results for "${query}"`;
+        noResults.className = 'search-empty search-none';
+        noResults.innerHTML = `<p class="f3 mb-1">No results for “${escapeHtml(query)}”</p><p class="color-fg-muted mb-0">Try a different keyword, or browse the <a href="${base}docs/get-started/installation/">docs</a> and the <a href="${base}blog/">blog</a>.</p>`;
         searchResults.appendChild(noResults);
         if (searchStatus) searchStatus.hidden = true;
+        setActive(-1);
         return;
       }
 
@@ -141,19 +195,27 @@ const base = import.meta.env.BASE_URL;
         a.className = 'search-result';
         // Pagefind excerpts contain trusted <mark> highlights generated from indexed content
         a.innerHTML = `
-          <div class="d-flex flex-items-center" style="gap: var(--base-size-8)">
-            <span class="search-result-title">${escapeHtml(result.meta?.title || 'Untitled')}</span>
-            ${getSectionBadge(section)}
-          </div>
-          <div class="search-excerpt mt-1">${result.excerpt || ''}</div>
-        `;
+          <span class="search-glyph" aria-hidden="true">${SECTION_GLYPH[section] || '📄'}</span>
+          <span class="search-result-main">
+            <span class="d-flex flex-items-center" style="gap: var(--base-size-8)">
+              <span class="search-result-title">${escapeHtml(result.meta?.title || 'Untitled')}</span>
+              ${getSectionBadge(section)}
+            </span>
+            <span class="search-path">${escapeHtml(pathFromUrl(result.url))}</span>
+            <div class="search-excerpt">${result.excerpt || ''}</div>
+          </span>
+          <svg class="octicon search-enter" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8.22 2.97a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l2.97-2.97H3.75a.75.75 0 0 1 0-1.5h7.44L8.22 4.03a.75.75 0 0 1 0-1.06Z"></path></svg>`;
         // Close dialog on click - navigation proceeds via View Transitions
         a.addEventListener('click', closeSearch);
+        a.addEventListener('mousemove', () => { const i = options().indexOf(a); if (i !== activeIndex) setActive(i); });
         searchResults.appendChild(a);
       });
+      setActive(0);
     } catch {
+      if (searchSpinner) searchSpinner.hidden = true;
       if (searchResults) {
-        searchResults.innerHTML = '<div class="p-5 text-center color-fg-muted">Search index loading...</div>';
+        if (searchEmpty) searchEmpty.hidden = true;
+        searchResults.innerHTML = '<div class="search-empty">Search index loading…</div>';
       }
     }
   }
@@ -179,7 +241,9 @@ const base = import.meta.env.BASE_URL;
     if (_onBackdropClick && searchBackdrop) searchBackdrop.removeEventListener('click', _onBackdropClick);
     if (_onCloseClick && searchCloseBtn) searchCloseBtn.removeEventListener('click', _onCloseClick);
     if (_onInput && searchInput) searchInput.removeEventListener('input', _onInput);
+    if (_onInputKey && searchInput) searchInput.removeEventListener('keydown', _onInputKey);
     if (_onDialogClose && searchModal) searchModal.removeEventListener('close', _onDialogClose);
+    if (_onResultsKey && searchResults) searchResults.removeEventListener('keydown', _onResultsKey);
 
     // Re-query all DOM elements (fresh references after View Transition swap)
     searchBtn = document.getElementById('search-btn');
@@ -190,6 +254,7 @@ const base = import.meta.env.BASE_URL;
     searchEmpty = document.getElementById('search-empty');
     searchCloseBtn = document.getElementById('search-close-kbd');
     searchStatus = document.getElementById('search-status');
+    searchSpinner = document.getElementById('search-spinner');
 
     const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
     const modifierEl = document.getElementById('search-modifier');
@@ -204,14 +269,38 @@ const base = import.meta.env.BASE_URL;
     _onDialogClose = () => resetSearch();
     _onInput = () => {
       clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => performSearch(), 200);
+      debounceTimer = setTimeout(() => performSearch(), 150);
+    };
+    _onInputKey = (e) => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); setActive(Math.max(activeIndex, 0), true); }
+      else if (e.key === 'Enter') {
+        const el = options()[activeIndex];
+        if (el) { e.preventDefault(); el.click(); }
+      } else if (e.key === 'Escape' && searchInput.value) {
+        // First Escape clears the query; a second closes the dialog
+        e.preventDefault();
+        resetSearch();
+      }
     };
 
     searchBtn?.addEventListener('click', _onBtnClick);
     searchBackdrop?.addEventListener('click', _onBackdropClick);
     searchCloseBtn?.addEventListener('click', _onCloseClick);
     searchInput?.addEventListener('input', _onInput);
+    searchInput?.addEventListener('keydown', _onInputKey);
     searchModal?.addEventListener('close', _onDialogClose);
+    // Arrow keys move focus between result links; ArrowUp from the first returns to the input
+    _onResultsKey = (e) => {
+      const items = options();
+      const i = items.indexOf(document.activeElement);
+      if (i < 0) return;
+      if (e.key === 'ArrowDown') { e.preventDefault(); setActive(i + 1, true); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); if (i === 0) { searchInput.focus(); } else { setActive(i - 1, true); } }
+    };
+    searchResults?.addEventListener('keydown', _onResultsKey);
+    searchResults?.addEventListener('focusin', (e) => { const i = options().indexOf(e.target); if (i >= 0) setActive(i); });
+    // Suggestions are links in the initial markup; make them close the dialog on click
+    options().forEach((a) => a.addEventListener('click', closeSearch));
 
     if (!_globalKeydownRegistered) {
       document.addEventListener('keydown', handleGlobalKeydown);
