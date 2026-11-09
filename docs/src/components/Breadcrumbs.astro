@@ -6,6 +6,9 @@ interface Props {
 }
 
 const { crumbs } = Astro.props;
+// A crumb that points at the page you are already on would be a link that goes nowhere; render it as text
+const here = Astro.url.pathname.replace(/\/?$/, '/');
+const isHere = (href?: string) => !!href && href.split(/[?#]/)[0].replace(/\/?$/, '/') === here;
 const origin = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : Astro.url.pathname;
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -36,6 +39,8 @@ const safeJson = JSON.stringify(jsonLd)
       <li class:list={['crumb', { 'crumb-current': i === crumbs.length - 1 }]}>
         {i === crumbs.length - 1 ? (
           <span aria-current="page" title={c.label}>{c.label}</span>
+        ) : isHere(c.href) ? (
+          <span class="crumb-static">{c.label}</span>
         ) : (
           <a href={c.href}>{c.label}</a>
         )}

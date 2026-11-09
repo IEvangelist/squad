@@ -212,4 +212,16 @@ test.describe('review follow-ups', () => {
     await page.keyboard.press('Enter');
     await expect(page).toHaveURL(/\/squad\/$/);
   });
+
+  test('crumbs that point at the current page are plain text, not dead links', async ({ page }) => {
+    // First page of "Get Started": both "Docs" and the section link would target this very page
+    await page.goto('/squad/docs/get-started/installation/');
+    const nav = page.getByRole('navigation', { name: 'Breadcrumb' });
+    await expect(nav.getByRole('link', { name: 'Docs' })).toHaveCount(0);
+    await page.goto('/squad/docs/get-started/five-minute-start/');
+    await expect(page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', { name: 'Get Started' })).toHaveCount(0);
+    // Every remaining breadcrumb link must navigate somewhere else
+    const hrefs = await page.locator('nav[aria-label="Breadcrumb"] a').evaluateAll((as) => as.map((a) => a.pathname));
+    for (const h of hrefs) expect(h).not.toBe('/squad/docs/get-started/five-minute-start/');
+  });
 });
