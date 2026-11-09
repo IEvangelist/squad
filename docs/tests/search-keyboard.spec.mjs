@@ -5,7 +5,7 @@ test.describe('Site search dialog', () => {
     await page.goto('/squad/');
     await page.keyboard.press('Control+k');
     await expect(page.locator('#search-modal')).toBeVisible();
-    await expect(page.getByText('Jump to')).toBeVisible();
+    await expect(page.getByText('Suggested')).toBeVisible();
 
     await page.keyboard.type('skills');
     const results = page.locator('#search-results a.search-result');

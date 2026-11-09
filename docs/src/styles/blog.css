@@ -204,4 +204,12 @@ html[data-color-mode][data-color-mode="dark"] .chip-new { color: #3fe06c; backgr
 @media (prefers-color-scheme: dark) { html[data-color-mode][data-color-mode="auto"] .chip-new { color: #3fe06c; background: #0c2e18; } }
 .chip-draft { background: transparent; border: var(--borderWidth-thin) dashed var(--borderColor-default); }
 .meta { font-size: 0.875rem; }
-.pager-nav .btn { min-width: 2.25rem; }
+.pager-nav { gap: var(--base-size-4); padding: var(--base-size-48) var(--base-size-24); }
+.pg { display: inline-flex; align-items: center; justify-content: center; gap: var(--base-size-4); height: 2rem; min-width: 2rem; padding: 0 var(--base-size-8); font: inherit; font-size: 1rem; font-weight: var(--base-text-weight-medium); color: var(--fgColor-default); background: transparent; border: var(--borderWidth-thin) solid transparent; border-radius: 6px; cursor: pointer; transition: background-color 0.15s ease, border-color 0.15s ease; }
+.pg:hover:not(:disabled):not([aria-current]) { background: var(--bgColor-muted); }
+.pg:focus-visible { outline: 2px solid var(--focus-outlineColor); outline-offset: 2px; }
+.pg-ctrl { padding: 0 var(--base-size-12); border-color: var(--borderColor-default); }
+.pg-num { min-width: 2.25rem; }
+.pg[aria-current="page"] { color: #fff; background: var(--bgColor-accent-emphasis); border-color: var(--bgColor-accent-emphasis); cursor: default; }
+.pg:disabled { color: var(--fgColor-muted); cursor: not-allowed; }
+.pg:disabled .octicon { opacity: 0.7; }
