@@ -15,7 +15,7 @@ const isBlogActive = pathname.startsWith(`${base}blog/`);
     <button
       id="mobile-nav-toggle"
       type="button"
-      class="btn-octicon d-lg-none"
+      class:list={['btn-octicon', isDocsActive ? 'd-lg-none' : 'd-md-none']}
       aria-label="Toggle navigation menu"
       aria-expanded="false"
       aria-controls="mobile-nav"

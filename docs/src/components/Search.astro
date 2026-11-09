@@ -203,6 +203,8 @@ const suggestions = [
       });
       setActive(0);
     } catch {
+      // Ignore failures from superseded requests (cleared query, reopened dialog, newer search)
+      if (token !== searchToken) return;
       if (searchSpinner) searchSpinner.hidden = true;
       if (searchResults) {
         if (searchEmpty) searchEmpty.hidden = true;
@@ -267,7 +269,19 @@ const suggestions = [
     _onInput = () => {
       if (searchClear) searchClear.hidden = !searchInput.value;
       clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => performSearch(), 150);
+      // Invalidate in-flight responses and drop selectable options from the previous query,
+      // so Enter or arrow keys cannot activate stale results while the new query is pending
+      searchToken++;
+      if (searchInput.value.trim()) {
+        if (searchResults) searchResults.innerHTML = '';
+        if (searchEmpty) searchEmpty.hidden = true;
+        if (searchStatus) searchStatus.hidden = true;
+        if (searchSpinner) searchSpinner.hidden = false;
+        setActive(-1);
+        debounceTimer = setTimeout(() => performSearch(), 150);
+      } else {
+        resetSearch();
+      }
     };
     _onInputKey = (e) => {
       if (e.key === 'ArrowDown') { e.preventDefault(); e.stopPropagation(); setActive(Math.max(activeIndex, 0), true); }

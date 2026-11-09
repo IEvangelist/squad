@@ -139,8 +139,9 @@ a.cell:hover .cell-title .octicon, .post-card:hover .cell-title .octicon { trans
 .mono-label { font-size: 0.875rem; font-weight: 400; letter-spacing: 0.015em; }
 
 .head-controls { display: flex; align-items: stretch; align-self: stretch; gap: var(--base-size-24); }
-.head-controls .count-text { display: none; align-self: center; font-size: 0.875rem; color: var(--fgColor-muted); }
-@media (min-width: 1200px) { .head-controls .count-text { display: block; } }
+/* Always in the accessibility tree (it is the live status region); visually hidden on narrow screens */
+.head-controls .count-text { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; align-self: center; font-size: 0.875rem; color: var(--fgColor-muted); }
+@media (min-width: 1200px) { .head-controls .count-text { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; white-space: normal; } }
 .head-divider { width: 1px; margin-block: var(--base-size-24); background: var(--fgColor-default); opacity: 0.85; }
 
 .dd { position: relative; display: flex; align-items: center; gap: var(--base-size-8); }

@@ -17,6 +17,14 @@ const jsonLd = {
     item: c.href ? (Astro.site ? new URL(c.href, Astro.site).href : c.href) : origin,
   })),
 };
+
+// Escape characters that could terminate the script element or break parsing (e.g. a title containing </script>)
+const safeJson = JSON.stringify(jsonLd)
+  .replace(/</g, '\\u003c')
+  .replace(/>/g, '\\u003e')
+  .replace(/&/g, '\\u0026')
+  .replace(/\u2028/g, '\\u2028')
+  .replace(/\u2029/g, '\\u2029');
 ---
 
 {crumbs.length === 0 ? (
@@ -35,6 +43,6 @@ const jsonLd = {
     ))}
   </ol>
   <slot />
-  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <script type="application/ld+json" set:html={safeJson} />
 </nav>
 )}

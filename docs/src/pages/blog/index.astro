@@ -194,7 +194,10 @@ const count = (key: 'category' | 'author', value: string) => posts.filter((p) =>
       if (focusButton) button.focus();
     };
     const open = () => {
-      document.querySelectorAll<HTMLElement>('.dd-menu:not([hidden])').forEach((m) => { m.hidden = true; });
+      document.querySelectorAll<HTMLElement>('.dd-menu:not([hidden])').forEach((m) => {
+        m.hidden = true;
+        m.closest('.dd')?.querySelector('.dd-btn')?.setAttribute('aria-expanded', 'false');
+      });
       menu.hidden = false;
       button.setAttribute('aria-expanded', 'true');
       (opts.find((o) => o.getAttribute('aria-selected') === 'true') ?? opts[0]).focus();
@@ -295,6 +298,9 @@ const count = (key: 'category' | 'author', value: string) => posts.filter((p) =>
         b.onclick = () => {
           page = target;
           apply(false);
+          // The pager was rebuilt: restore keyboard focus to the equivalent control (or the current page)
+          const again = Array.from(pager.querySelectorAll<HTMLButtonElement>('button')).find((x) => x.getAttribute('aria-label') === opts.aria && !x.disabled);
+          (again ?? pager.querySelector<HTMLElement>('[aria-current="page"]'))?.focus({ preventScroll: true });
           document.getElementById('all-title')?.scrollIntoView({ block: 'start' });
         };
         pager.appendChild(b);

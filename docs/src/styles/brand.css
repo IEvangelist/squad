@@ -372,8 +372,7 @@ a.cell:hover .round-arrow { transform: translateX(3px); color: #fff; background:
 .cell:hover h3 { color: var(--fgColor-accent); }
 
 /* Post pages render their own hero; hide the duplicate H1 from the markdown body */
-.article-body .markdown-body > h1:first-child,
-.article-body .markdown-body > h1:first-child + blockquote { display: none; }
+.article-body .markdown-body > h1:first-child { display: none; }
 
 /* ---------- Docs ---------- */
 .docs-layout { max-width: var(--frame-w); margin-inline: auto; background: var(--bgColor-default); border-inline: var(--borderWidth-thin) solid var(--fx-hairline); }

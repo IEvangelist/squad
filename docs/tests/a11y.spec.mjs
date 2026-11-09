@@ -161,3 +161,55 @@ test.describe('breadcrumbs', () => {
     await expect(page.getByRole('checkbox', { name: 'Release' })).toBeChecked();
   });
 });
+
+test.describe('review follow-ups', () => {
+  test('tablet non-docs pages show no hamburger, docs pages do', async ({ page }) => {
+    await page.setViewportSize({ width: 900, height: 900 });
+    await page.goto('/squad/blog/');
+    await expect(page.locator('#mobile-nav-toggle')).toBeHidden();
+    await page.goto('/squad/docs/features/skills/');
+    await expect(page.locator('#mobile-nav-toggle')).toBeVisible();
+  });
+
+  test('blog JSON-LD is safe for titles with script-closing sequences', async ({ page }) => {
+    await page.goto('/squad/blog/004-v020-release/');
+    const raw = await page.locator('script[type="application/ld+json"]').first().textContent();
+    expect(raw).not.toContain('<');
+    expect(() => JSON.parse(raw)).not.toThrow();
+  });
+
+  test('result count stays in the accessibility tree on small screens', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 800 });
+    await page.goto('/squad/blog/');
+    await page.locator('#post-search').fill('release');
+    await expect(page.getByRole('status').filter({ hasText: /post/ })).toHaveCount(1);
+  });
+
+  test('opening a second dropdown resets the first trigger', async ({ page }) => {
+    await page.goto('/squad/blog/');
+    await page.locator('#post-sort').click();
+    await page.locator('#post-size').click();
+    await expect(page.locator('#post-sort')).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.locator('#post-size')).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  test('keyboard focus survives pagination rebuilds', async ({ page }) => {
+    await page.goto('/squad/blog/');
+    const pager = page.getByRole('navigation', { name: 'Pagination' });
+    await pager.getByRole('button', { name: 'Next page' }).focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#post-pager [aria-current="page"]')).toHaveAttribute('aria-label', 'Page 2');
+    expect(await page.evaluate(() => document.activeElement?.closest('#post-pager') !== null)).toBe(true);
+  });
+
+  test('Enter cannot open a stale result while a new query is pending', async ({ page }) => {
+    await page.goto('/squad/');
+    await page.keyboard.press('Control+k');
+    await page.keyboard.type('skills');
+    await expect(page.locator('#search-results a.search-result').first()).toBeVisible({ timeout: 10_000 });
+    await page.keyboard.type('x');
+    await expect(page.locator('#search-results a.search-result')).toHaveCount(0);
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/\/squad\/$/);
+  });
+});

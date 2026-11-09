@@ -10,6 +10,7 @@ function textOf(node) {
  * - Wide tables scroll horizontally, so they must be keyboard-focusable (axe: scrollable-region-focusable).
  * - GFM task-list checkboxes get an accessible name from their list item text (axe: label).
  * - Empty table header cells get hidden text (axe: empty-table-header).
+ * - Blog posts drop a blockquote that duplicates the frontmatter hero shown in the page hero.
  * - Pages whose markdown has no H1 get a visually hidden one from frontmatter (axe: page-has-heading-one).
  */
 export function rehypeA11y() {
@@ -31,6 +32,19 @@ export function rehypeA11y() {
         });
       }
     });
+
+    // Blog posts repeat their frontmatter `hero` as a blockquote under the H1; the page renders that
+    // lead in its own hero, so drop only a blockquote that really duplicates it.
+    const hero = file?.data?.astro?.frontmatter?.hero;
+    if (hero) {
+      const norm = (s) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+      const h1 = tree.children.findIndex((n) => n.type === 'element' && n.tagName === 'h1');
+      if (h1 >= 0) {
+        const next = tree.children.findIndex((n, i) => i > h1 && n.type === 'element');
+        const node = tree.children[next];
+        if (node?.tagName === 'blockquote' && norm(textOf(node)) === norm(hero)) tree.children.splice(next, 1);
+      }
+    }
 
     const title = file?.data?.astro?.frontmatter?.title;
     if (!hasH1 && title) {
