@@ -4,6 +4,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import Icon from '../../components/Icon.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import { categoryOf, cleanAuthor, formatDate, titleFromId, toDate } from '../../lib/blog';
 
 const base = import.meta.env.BASE_URL;
 
@@ -18,25 +20,50 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 
-function extractTitle(id: string): string {
-  return id
-    .replace(/^\d+[a-z]?-/, '')
-    .replace(/-/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-const title = entry.data.title || extractTitle(entry.id);
+const title = entry.data.title || titleFromId(entry.id);
+const lead = entry.data.hero || entry.data.description || '';
+const date = toDate(entry.data.date);
+const category = categoryOf(entry.data.tags);
+const tags = (entry.data.tags ?? []).filter((t) => t !== 'squad' && t.toLowerCase() !== category.toLowerCase()).slice(0, 4);
 ---
 
-<BaseLayout title={title} description={entry.data.description}>
+<BaseLayout title={title} description={entry.data.description || entry.data.hero}>
   <Header />
-  <main id="main-content" class="container-lg px-3 px-md-4 py-5" tabindex="-1">
-    <nav aria-label="Breadcrumb" class="mb-4" data-pagefind-ignore>
-      <a href={`${base}blog/`}><Icon name="arrow-left" class="mr-1" />Back to Blog</a>
-    </nav>
-    <article class="markdown-body" data-pagefind-body data-pagefind-meta="section:Blog">
-      <Content />
-    </article>
+  <main id="main-content" tabindex="-1">
+    <div class="frame">
+      <nav class="crumbs" aria-label="Breadcrumb" data-pagefind-ignore>
+        <a href={`${base}blog/`}><Icon name="arrow-left" />Squad Blog</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{title}</span>
+      </nav>
+
+      <header class="article-hero">
+        <div class="fx-grid" aria-hidden="true"></div>
+        <div class="fx-glow fx-glow-a" aria-hidden="true"></div>
+        <div class="chips">
+          <span class="chip">{category}</span>
+          {entry.data.status === 'draft' && <span class="chip chip-draft">Draft</span>}
+          {tags.map((t) => <span class="chip chip-outline">{t}</span>)}
+        </div>
+        <h1 data-pagefind-ignore>{title}</h1>
+        {lead && <p class="lead" data-pagefind-ignore>{lead}</p>}
+        <div class="meta" data-pagefind-ignore>
+          {date && <time datetime={date.toISOString()}>{formatDate(date)}</time>}
+          <span>By {cleanAuthor(entry.data.author)}</span>
+        </div>
+      </header>
+
+      <div class="article-layout">
+        <div class="article-body">
+          <article class="markdown-body" data-pagefind-body data-pagefind-meta="section:Blog">
+            <Content />
+          </article>
+        </div>
+        <aside class="article-aside" aria-label="In this article" data-pagefind-ignore>
+          <TableOfContents heading="In this article" />
+        </aside>
+      </div>
+    </div>
   </main>
   <Footer />
 </BaseLayout>

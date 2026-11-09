@@ -1,46 +1,199 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import Icon from '../../components/Icon.astro';
+import squadLogo from '../../assets/images/squad-logo.png';
+import { CATEGORIES, categoryOf, cleanAuthor, formatDate, postNumber, titleFromId, toDate } from '../../lib/blog';
 
 const base = import.meta.env.BASE_URL;
-const posts = await getCollection('blog');
+const entries = await getCollection('blog');
 
-// Sort by filename (which is chronologically ordered by the number prefix)
-posts.sort((a, b) => b.id.localeCompare(a.id));
+const posts = entries
+  .map((entry) => {
+    const date = toDate(entry.data.date);
+    return {
+      id: entry.id,
+      title: entry.data.title || titleFromId(entry.id),
+      summary: entry.data.hero || entry.data.description || '',
+      date,
+      author: cleanAuthor(entry.data.author),
+      category: categoryOf(entry.data.tags),
+      draft: entry.data.status === 'draft',
+      number: postNumber(entry.id),
+      tags: (entry.data.tags ?? []).filter((t) => t !== 'squad' && t !== 'release').slice(0, 2),
+    };
+  })
+  .sort((a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0) || b.id.localeCompare(a.id));
 
-function extractTitle(id: string): string {
-  return id
-    .replace(/^\d+[a-z]?-/, '')
-    .replace(/-/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase());
-}
+const published = posts.filter((p) => !p.draft);
+const latest = published.slice(0, 3);
+const newIds = new Set(published.slice(0, 2).map((p) => p.id));
+const authors = [...new Set(posts.map((p) => p.author))].sort();
+const count = (key: 'category' | 'author', value: string) => posts.filter((p) => p[key] === value).length;
 ---
 
-<BaseLayout title="Blog">
+<BaseLayout title="Blog" description="Stories from the Squad development journey — releases, learnings, and the road ahead.">
   <Header />
-  <main id="main-content" class="container-lg px-3 px-md-4 py-5" tabindex="-1">
-    <h1 class="f0-ish mb-2">Blog</h1>
-    <p class="f3 color-fg-muted mb-5">Stories from the Squad development journey — releases, learnings, and the road ahead.</p>
+  <main id="main-content" tabindex="-1">
+    <div class="frame">
+      <section class="band hub-hero" aria-labelledby="blog-title">
+        <div class="fx-grid" aria-hidden="true"></div>
+        <Image src={squadLogo} alt="" class="hub-mark rounded-2" width={56} height={56} />
+        <h1 id="blog-title">Squad <span class="gradient-text">Blog</span></h1>
+        <p class="lead">Stories from the Squad development journey — releases, learnings, and the road ahead.</p>
+        <label class="hub-search" for="post-search">
+          <span class="sr-only">Search posts</span>
+          <Icon name="search" size={20} class="color-fg-muted" />
+          <input id="post-search" type="search" placeholder="What would you like to read about?" autocomplete="off" spellcheck="false" aria-controls="post-grid" />
+          <kbd aria-hidden="true">/</kbd>
+        </label>
+      </section>
 
-    <ul class="list-style-none stack-grid" style="gap: var(--base-size-16)">
-      {posts.map((post) => (
-        <li>
-          <a href={`${base}blog/${post.id}/`} class="card-link">
-            <h2 class="card-title h3 mb-1">{post.data.title || extractTitle(post.id)}</h2>
-            {post.data.description && (
-              <p class="color-fg-muted mb-2">{post.data.description}</p>
-            )}
-            <span class="color-fg-accent text-bold">
-              Read more<span class="sr-only"> about {post.data.title || extractTitle(post.id)}</span>
-              <Icon name="arrow-right" class="ml-1" />
-            </span>
-          </a>
-        </li>
-      ))}
-    </ul>
+      <section class="band" aria-labelledby="latest-title">
+        <div class="section-head"><h2 id="latest-title">Latest</h2><span class="mono-label">Fresh from the squad</span></div>
+        <div class="latest-grid">
+          {latest.map((p) => (
+            <a href={`${base}blog/${p.id}/`} class="cell">
+              <div class="chips">
+                <span class="chip chip-new">New</span>
+                <span class="chip">{p.category}</span>
+              </div>
+              <h3 class="cell-title"><span>{p.title}</span><Icon name="arrow-up-right" /></h3>
+              <p class="clamp-3">{p.summary}</p>
+              <div class={`thumb thumb-${p.category}`} aria-hidden="true">
+                <span class="thumb-cat">{p.category}</span>
+                <span class="thumb-num">{p.number}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <section aria-labelledby="all-title">
+        <div class="section-head">
+          <h2 id="all-title">All posts</h2>
+          <div class="d-flex flex-items-center" style="gap: var(--base-size-16)">
+            <span id="post-count" class="f6 color-fg-muted" role="status" aria-live="polite">{posts.length} posts</span>
+            <label class="d-flex flex-items-center f6 color-fg-muted" style="gap: var(--base-size-8)">
+              Sort by
+              <select id="post-sort" class="sort-select">
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="articles">
+          <form class="filters" id="post-filters" aria-label="Filter posts" onsubmit="return false">
+            <fieldset>
+              <legend class="mono-label">Category</legend>
+              {CATEGORIES.map((c) => (
+                <label><input type="checkbox" name="category" value={c} /> {c}<span class="count">{count('category', c)}</span></label>
+              ))}
+            </fieldset>
+            <fieldset>
+              <legend class="mono-label">Author</legend>
+              {authors.map((a) => (
+                <label><input type="checkbox" name="author" value={a} /> {a}<span class="count">{count('author', a)}</span></label>
+              ))}
+            </fieldset>
+            <button type="reset" class="btn btn-sm" id="filters-reset">Clear filters</button>
+          </form>
+
+          <div>
+            <ul class="post-grid" id="post-grid">
+              {posts.map((p) => (
+                <li
+                  class="post-card"
+                  data-category={p.category}
+                  data-author={p.author}
+                  data-date={p.date?.toISOString() ?? ''}
+                  data-text={`${p.title} ${p.summary} ${p.tags.join(' ')} ${p.author}`.toLowerCase()}
+                >
+                  <div class="chips">
+                    {newIds.has(p.id) && <span class="chip chip-new">New</span>}
+                    {p.draft && <span class="chip chip-draft">Draft</span>}
+                    <span class="chip">{p.category}</span>
+                    {p.tags.map((t) => <span class="chip chip-outline">{t}</span>)}
+                  </div>
+                  <h3 class="card-title cell-title">
+                    <a href={`${base}blog/${p.id}/`} class="stretch"><span>{p.title}</span></a>
+                    <Icon name="arrow-up-right" />
+                  </h3>
+                  <p class="clamp-3">{p.summary}</p>
+                  <div class="meta">
+                    {p.date && <time datetime={p.date.toISOString()}>{formatDate(p.date)}</time>}
+                    <span>{p.author}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <p id="post-empty" class="empty-state" hidden>No posts match your filters.</p>
+          </div>
+        </div>
+      </section>
+    </div>
   </main>
   <Footer />
 </BaseLayout>
+
+<script>
+  function initBlogHub() {
+    const grid = document.getElementById('post-grid');
+    if (!grid) return;
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>('.post-card'));
+    const search = document.getElementById('post-search') as HTMLInputElement;
+    const sort = document.getElementById('post-sort') as HTMLSelectElement;
+    const form = document.getElementById('post-filters') as HTMLFormElement;
+    const status = document.getElementById('post-count');
+    const empty = document.getElementById('post-empty');
+
+    const checked = (name: string) =>
+      Array.from(form.querySelectorAll<HTMLInputElement>(`input[name="${name}"]:checked`)).map((i) => i.value);
+
+    function apply() {
+      const q = search.value.trim().toLowerCase();
+      const cats = checked('category');
+      const authors = checked('author');
+      let visible = 0;
+      cards.forEach((card) => {
+        const show =
+          (!q || (card.dataset.text ?? '').includes(q)) &&
+          (!cats.length || cats.includes(card.dataset.category ?? '')) &&
+          (!authors.length || authors.includes(card.dataset.author ?? ''));
+        card.hidden = !show;
+        if (show) visible++;
+      });
+      const dir = sort.value === 'oldest' ? 1 : -1;
+      cards
+        .slice()
+        .sort((a, b) => dir * ((a.dataset.date ?? '').localeCompare(b.dataset.date ?? '')))
+        .forEach((card) => grid.appendChild(card));
+      if (status) status.textContent = `${visible} post${visible === 1 ? '' : 's'}`;
+      if (empty) empty.hidden = visible !== 0;
+    }
+
+    search.oninput = apply;
+    sort.onchange = apply;
+    form.onchange = apply;
+    form.onreset = () => setTimeout(apply);
+
+
+
+  }
+
+  // Registered once: the script module only evaluates once across view transitions
+  document.addEventListener('keydown', (e) => {
+    const search = document.getElementById('post-search');
+    const t = e.target as HTMLElement;
+    if (search && e.key === '/' && !/input|textarea|select/i.test(t.tagName) && !t.isContentEditable) {
+      e.preventDefault();
+      search.focus();
+    }
+  });
+  document.addEventListener('astro:page-load', initBlogHub);
+</script>

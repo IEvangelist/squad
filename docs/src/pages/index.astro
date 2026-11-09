@@ -7,22 +7,22 @@ import Icon from '../components/Icon.astro';
 const base = import.meta.env.BASE_URL;
 
 const agents = [
-  { icon: '🏗️', name: 'Flight', task: 'reviewing requirements, defining API contract' },
-  { icon: '⚛️', name: 'EECOM', task: 'building RecipeList component' },
-  { icon: '🔧', name: 'CAPCOM', task: 'creating GET /api/recipes endpoint' },
-  { icon: '🧪', name: 'FIDO', task: 'writing test cases from requirements' },
-  { icon: '📋', name: 'Scribe', task: 'logging decisions' },
+  { icon: '🏗️', name: 'Flight', color: '#d4a017', task: 'reviewing requirements, defining API contract' },
+  { icon: '⚛️', name: 'EECOM', color: '#4aa3ff', task: 'building RecipeList component' },
+  { icon: '🔧', name: 'CAPCOM', color: '#3fb950', task: 'creating GET /api/recipes endpoint' },
+  { icon: '🧪', name: 'FIDO', color: '#b794f6', task: 'writing test cases from requirements' },
+  { icon: '📋', name: 'Scribe', color: '#9aa7bd', task: 'logging decisions' },
 ];
 
 const trust = ['Humans stay in charge', 'Built-in governance', 'Persistent team memory', 'MIT open source'];
 
 const features = [
-  { icon: '🚀', title: 'Human-Directed Parallel Work', wide: true, body: 'Give a task to the team and specialists fan out together. You set the direction, review the results, and keep the final decision. Squad uses AI-emulated specialist roles to make a real human more productive, not to replace real humans.' },
-  { icon: '🧠', title: 'Persistent Memory', body: 'Agents remember decisions and conventions across sessions so people spend less time repeating context and more time reviewing the work that matters.' },
-  { icon: '🐙', title: 'GitHub-Native', html: 'Squad lives in your repo as <code>.squad/</code>. Commit it, share it, clone it. Team state, decisions, and context stay inspectable with your code.' },
-  { icon: '🛡️', title: 'Built-in Governance', wide: true, body: 'File-write guards, PII scrubbing, reviewer lockout, and clear escalation points — rules enforced in code, not suggestions in prompts.' },
-  { icon: '⚡', title: 'SDK-First Design', html: 'Define your team in TypeScript with <code>squad.config.ts</code>. Typed, testable, version-controlled.' },
-  { icon: '🔌', title: 'Extensible', wide: true, body: 'Plugins, marketplace, MCP integration, custom hooks — extend Squad to fit your workflow.' },
+  { icon: '🚀', tile: 'rose', title: 'Human-Directed Parallel Work', wide: true, body: 'Give a task to the team and specialists fan out together. You set the direction, review the results, and keep the final decision. Squad uses AI-emulated specialist roles to make a real human more productive, not to replace real humans.' },
+  { icon: '🧠', tile: 'teal', title: 'Persistent Memory', body: 'Agents remember decisions and conventions across sessions so people spend less time repeating context and more time reviewing the work that matters.' },
+  { icon: '🐙', tile: 'navy', title: 'GitHub-Native', html: 'Squad lives in your repo as <code>.squad/</code>. Commit it, share it, clone it. Team state, decisions, and context stay inspectable with your code.' },
+  { icon: '🛡️', tile: 'navy', title: 'Built-in Governance', wide: true, body: 'File-write guards, PII scrubbing, reviewer lockout, and clear escalation points — rules enforced in code, not suggestions in prompts.' },
+  { icon: '⚡', tile: 'teal', title: 'SDK-First Design', html: 'Define your team in TypeScript with <code>squad.config.ts</code>. Typed, testable, version-controlled.' },
+  { icon: '🔌', tile: 'rose', title: 'Extensible', wide: true, body: 'Plugins, marketplace, MCP integration, custom hooks — extend Squad to fit your workflow.' },
 ];
 
 const steps = [
@@ -32,10 +32,10 @@ const steps = [
 ];
 
 const docs = [
-  { icon: '🚀', title: 'Get Started', body: 'Install and run your first session in 60 seconds', href: `${base}docs/get-started/installation/` },
-  { icon: '⚙️', title: 'Features', body: 'Parallel work, memory, routing, governance, and more', href: `${base}docs/features/team-setup/` },
-  { icon: '📖', title: 'Reference', body: 'CLI commands, SDK API, configuration', href: `${base}docs/reference/cli/` },
-  { icon: '🗺️', title: 'Scenarios', body: 'Real-world patterns for your project type', href: `${base}docs/scenarios/existing-repo/` },
+  { icon: '🚀', tile: 'rose', title: 'Get Started', body: 'Install and run your first session in 60 seconds', href: `${base}docs/get-started/installation/` },
+  { icon: '⚙️', tile: 'teal', title: 'Features', body: 'Parallel work, memory, routing, governance, and more', href: `${base}docs/features/team-setup/` },
+  { icon: '📖', tile: 'navy', title: 'Reference', body: 'CLI commands, SDK API, configuration', href: `${base}docs/reference/cli/` },
+  { icon: '🗺️', tile: 'rose', title: 'Scenarios', body: 'Real-world patterns for your project type', href: `${base}docs/scenarios/existing-repo/` },
 ];
 ---
 
@@ -43,91 +43,101 @@ const docs = [
   <Header />
 
   <main id="main-content" tabindex="-1">
-    <section class="hero" aria-labelledby="hero-title">
-      <div class="container-xl px-3 px-md-4 py-6">
-        <div class="hero-grid">
-          <div>
-            <p class="animate-fade-up d-inline-flex flex-items-center border rounded-2 px-2 py-1 f6 color-fg-muted mb-4">
-              <span class="color-fg-success mr-1" aria-hidden="true">●</span> v1.1.0 — Stable release
-            </p>
+    <section class="hero band" aria-labelledby="hero-title">
+      <div class="fx-glow fx-glow-a" aria-hidden="true"></div>
+      <div class="fx-glow fx-glow-b" aria-hidden="true"></div>
+      <div class="fx-grid" aria-hidden="true"></div>
+      <div class="fx-grain" aria-hidden="true"></div>
+      <div class="frame" style="position: relative">
+        <div class="px-4 px-md-5 py-6">
+          <div class="hero-grid">
+            <div>
+              <p class="animate-fade-up pill mb-4">
+                <span class="pill-dot" aria-hidden="true"></span> v1.1.0 — Stable release
+              </p>
 
-            <h1 id="hero-title" class="animate-fade-up delay-100 hero-title mb-3">
-              Your agents <em>bring your ideas to life</em>
-            </h1>
+              <h1 id="hero-title" class="animate-fade-up delay-100 hero-title mb-3">
+                Your agents <em>bring your ideas to life</em>
+              </h1>
 
-            <p class="animate-fade-up delay-200 f3 color-fg-muted mb-4" style="max-width: 40rem">
-              Describe what you're building. Squad coordinates agents that live in your repo and grow with your code. You spend less time prompting, more time deciding, and convert ideas into product more efficiently than ever before.
-            </p>
+              <p class="animate-fade-up delay-200 f3 color-fg-muted mb-4" style="max-width: 38rem">
+                Describe what you're building. Squad coordinates agents that live in your repo and grow with your code. You spend less time prompting, more time deciding, and convert ideas into product more efficiently than ever before.
+              </p>
 
-            <div class="animate-fade-up delay-300 d-flex flex-wrap mb-4" style="gap: var(--base-size-12)">
-              <a href={`${base}docs/get-started/installation/`} class="btn btn-primary btn-large">
-                Get started<Icon name="arrow-right" class="ml-2" />
-              </a>
-              <a href="https://github.com/github/squad" target="_blank" rel="noopener" class="btn btn-large">
-                <Icon name="mark-github" class="mr-2" />View on GitHub
-              </a>
-            </div>
+              <div class="animate-fade-up delay-300 d-flex flex-wrap mb-4" style="gap: var(--base-size-12)">
+                <a href={`${base}docs/get-started/installation/`} class="btn btn-primary btn-large">
+                  Get started<Icon name="arrow-right" class="ml-2" />
+                </a>
+                <a href="https://github.com/github/squad" target="_blank" rel="noopener" class="btn btn-large">
+                  <Icon name="mark-github" class="mr-2" />View on GitHub
+                </a>
+              </div>
 
-            <div class="animate-fade-up delay-300 d-none d-sm-inline-flex flex-items-center border rounded-2 color-bg-default pl-3 pr-1 py-1" style="gap: var(--base-size-12)">
-              <code class="f5">npm i -g @bradygaster/squad-cli</code>
-              <button id="copy-install" type="button" class="btn-octicon" aria-label="Copy install command">
-                <Icon name="copy" />
-              </button>
-            </div>
-          </div>
-
-          <div class="animate-fade-up delay-200">
-            <div class="terminal mb-4" role="img" aria-label="Example Copilot Chat session where Squad assigns five agents to build a recipe listing page in parallel">
-              <div class="terminal-bar">Copilot Chat</div>
-              <div class="terminal-body">
-                <p class="f6 color-fg-muted mb-1">YOU</p>
-                <p class="mb-3">Team, build the recipe listing page. We need an API endpoint that returns recipes and a React component that displays them.</p>
-                <p class="f6 color-fg-muted mb-2 border-top pt-3">SQUAD RESPONSE</p>
-                <ul class="list-style-none mb-3">
-                  {agents.map((agent, i) => (
-                    <li class="agent-line d-flex mb-2" style={`--delay: ${i}; gap: var(--base-size-8)`}>
-                      <span aria-hidden="true">{agent.icon}</span>
-                      <span><span class="text-bold color-fg-accent">{agent.name}</span><span class="color-fg-muted"> — {agent.task}</span></span>
-                    </li>
-                  ))}
-                </ul>
-                <p class="color-fg-muted border-top pt-2 mb-0">5 agents working in parallel…</p>
+              <div class="animate-fade-up delay-300 d-none d-sm-inline-flex flex-items-center border rounded-2 color-bg-default pl-3 pr-1 py-1" style="gap: var(--base-size-12)">
+                <code class="f5">npm i -g @bradygaster/squad-cli</code>
+                <button id="copy-install" type="button" class="btn-octicon" aria-label="Copy install command">
+                  <Icon name="copy" />
+                </button>
               </div>
             </div>
 
-            <div class="card" role="note">
-              <p class="mb-0 color-fg-default">
-                <strong>Responsible AI, explicitly:</strong> Squad democratizes multi-agentic work and extends human development teams' capabilities. Its goal is to make an individual more productive while enabling human oversight, review, and accountability at agentic speed.
-              </p>
+            <div class="animate-fade-up delay-200">
+              <div class="terminal mb-4" role="img" aria-label="Example Copilot Chat session where Squad assigns five agents to build a recipe listing page in parallel">
+                <div class="terminal-bar">
+                  <span class="terminal-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                  <span>Copilot Chat</span>
+                </div>
+                <div class="terminal-body">
+                  <p class="f6 color-fg-muted mb-1">YOU</p>
+                  <p class="mb-3">Team, build the recipe listing page. We need an API endpoint that returns recipes and a React component that displays them.</p>
+                  <p class="f6 color-fg-muted mb-2 border-top pt-3">SQUAD RESPONSE</p>
+                  <ul class="list-style-none mb-3">
+                    {agents.map((agent, i) => (
+                      <li class="agent-line d-flex mb-2" style={`--delay: ${i}; gap: var(--base-size-8)`}>
+                        <span class="agent-chip" aria-hidden="true">{agent.icon}</span>
+                        <span><span class="agent-name" style={`color: ${agent.color}`}>{agent.name}</span><span class="color-fg-muted"> — {agent.task}</span></span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p class="color-fg-muted border-top pt-2 mb-0">5 agents working in parallel<span class="caret" aria-hidden="true"></span></p>
+                </div>
+              </div>
+
+              <div class="card" role="note" style="background: var(--bgColor-accent-muted); border-color: var(--borderColor-accent-muted)">
+                <p class="mb-0 color-fg-default">
+                  <strong>Responsible AI, explicitly:</strong> Squad democratizes multi-agentic work and extends human development teams' capabilities. Its goal is to make an individual more productive while enabling human oversight, review, and accountability at agentic speed.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="border-bottom" aria-label="Highlights">
-      <ul class="container-xl px-3 px-md-4 py-3 list-style-none d-flex flex-wrap flex-justify-center f4" style="gap: var(--base-size-8) var(--base-size-32)">
-        {trust.map((t) => <li class="color-fg-muted"><span class="color-fg-accent" aria-hidden="true">✓ </span>{t}</li>)}
-      </ul>
+    <section class="band" aria-label="Highlights">
+      <div class="frame">
+        <ul class="trust list-style-none f4">
+          {trust.map((t) => <li>{t}</li>)}
+        </ul>
+      </div>
     </section>
 
-    <section class="py-6 reveal" aria-labelledby="why-title">
-      <div class="container-xl px-3 px-md-4">
-        <div class="text-center mb-5">
-          <p class="color-fg-accent text-bold text-uppercase f6 mb-2">Why Squad?</p>
-          <h2 id="why-title" class="h1 mb-3">Multi-agent orchestration, with humans in charge</h2>
+    <section class="band reveal" aria-labelledby="why-title">
+      <div class="frame">
+        <div class="text-center px-3 py-6">
+          <p class="eyebrow mb-3">Why Squad?</p>
+          <h2 id="why-title" class="f1 mb-3" style="font-weight: 650">Multi-agent orchestration, <br class="d-none d-md-inline" />with humans in charge</h2>
           <p class="f3 color-fg-muted mx-auto" style="max-width: 40rem">
             Enforced rules, persistent teams, and accountable workflows — everything you need for AI that helps people ship responsibly.
           </p>
         </div>
-
-        <div class="features-grid">
+        <div class="bento">
           {features.map((f) => (
-            <div class:list={['card', { 'span-wide': f.wide }]}>
+            <div class:list={['cell', { 'span-2': f.wide }]}>
               <div class="d-flex" style="gap: var(--base-size-16)">
-                <span class="feature-icon" aria-hidden="true">{f.icon}</span>
+                <span class={`tile tile-${f.tile}`} aria-hidden="true">{f.icon}</span>
                 <div>
-                  <h3 class="h4 mb-2">{f.title}</h3>
+                  <h3 class="cell-title-plain h4 mb-2">{f.title}</h3>
                   {f.html ? <p class="color-fg-muted mb-0" set:html={f.html} /> : <p class="color-fg-muted mb-0">{f.body}</p>}
                 </div>
               </div>
@@ -137,48 +147,52 @@ const docs = [
       </div>
     </section>
 
-    <section class="py-6 color-bg-subtle border-y reveal" aria-labelledby="how-title">
-      <div class="container-lg px-3 px-md-4">
-        <div class="text-center mb-5">
-          <p class="color-fg-accent text-bold text-uppercase f6 mb-2">How it works</p>
-          <h2 id="how-title" class="h1">Three commands to a full team</h2>
+    <section class="band reveal" aria-labelledby="how-title" style="background: var(--bgColor-muted)">
+      <div class="frame">
+        <div class="px-3 px-md-5 py-6">
+          <div class="text-center mb-5">
+            <p class="eyebrow mb-3">How it works</p>
+            <h2 id="how-title" class="f1" style="font-weight: 650">Three commands to a full team</h2>
+          </div>
+          <ol class="steps-grid list-style-none">
+            {steps.map((s, i) => (
+              <li class="text-center d-flex flex-column flex-items-center">
+                <span class="step-number mb-3" aria-hidden="true">{i + 1}</span>
+                <h3 class="h4 mb-2">{s.title}</h3>
+                <p class="color-fg-muted mb-3">{s.body}</p>
+                <code class="border rounded-2 px-2 py-1 color-bg-default">{s.cmd}</code>
+              </li>
+            ))}
+          </ol>
         </div>
-        <ol class="steps-grid list-style-none">
-          {steps.map((s, i) => (
-            <li class="text-center d-flex flex-column flex-items-center">
-              <span class="step-number mb-3" aria-hidden="true">{i + 1}</span>
-              <h3 class="h4 mb-2">{s.title}</h3>
-              <p class="color-fg-muted mb-3">{s.body}</p>
-              <code class="border rounded-2 px-2 py-1 color-bg-default">{s.cmd}</code>
-            </li>
-          ))}
-        </ol>
       </div>
     </section>
 
-    <section class="py-6 reveal" aria-labelledby="docs-title">
-      <div class="container-xl px-3 px-md-4">
-        <div class="text-center mb-5">
-          <p class="color-fg-accent text-bold text-uppercase f6 mb-2">Documentation</p>
-          <h2 id="docs-title" class="h1">Explore the docs</h2>
+    <section class="band reveal" aria-labelledby="docs-title">
+      <div class="frame">
+        <div class="section-head">
+          <h2 id="docs-title">Explore the docs</h2>
+          <span class="mono-label d-none d-sm-inline">Documentation</span>
         </div>
-        <ul class="list-style-none features-grid" style="grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr))">
+        <div class="bento bento-4">
           {docs.map((d) => (
-            <li>
-              <a href={d.href} class="card-link" style="height: 100%">
-                <div class="f2 mb-2" aria-hidden="true">{d.icon}</div>
-                <h3 class="card-title h4 mb-1">{d.title}</h3>
-                <p class="color-fg-muted mb-0">{d.body}</p>
-              </a>
-            </li>
+            <a href={d.href} class="cell" style="display: flex; flex-direction: column; gap: var(--base-size-12); min-height: 13rem">
+              <span class={`tile tile-${d.tile}`} aria-hidden="true">{d.icon}</span>
+              <h3 class="card-title h3 mb-0">{d.title}</h3>
+              <p class="color-fg-muted mb-0">{d.body}</p>
+              <span class="round-arrow mt-auto" aria-hidden="true"><Icon name="arrow-right" /></span>
+            </a>
           ))}
-        </ul>
+        </div>
       </div>
     </section>
 
     <section class="cta-band py-6 text-center reveal" aria-labelledby="cta-title">
-      <div class="container-md px-3 px-md-4">
-        <h2 id="cta-title" class="f0-ish mb-3">Ship faster with a human-led AI team</h2>
+      <div class="fx-glow fx-glow-a" aria-hidden="true"></div>
+      <div class="fx-grid" aria-hidden="true"></div>
+      <div class="fx-grain" aria-hidden="true"></div>
+      <div class="container-md px-3 px-md-4" style="position: relative">
+        <h2 id="cta-title" class="f0-ish mb-3" style="color: #fff">Ship faster with a <span class="gradient-text">human-led AI team</span></h2>
         <p class="f3 color-fg-muted mb-4 mx-auto" style="max-width: 36rem">One install. One command. Keep people accountable while Squad handles the repetitive coordination.</p>
         <div class="d-flex flex-column flex-sm-row flex-justify-center" style="gap: var(--base-size-16)">
           <a href={`${base}docs/get-started/installation/`} class="btn btn-primary btn-large">Get started — it's free</a>

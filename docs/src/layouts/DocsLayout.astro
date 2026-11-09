@@ -33,7 +33,13 @@ const editUrl = currentSlug
   <div class="docs-layout">
     <Sidebar currentSlug={currentSlug} />
     <main id="main-content" class="docs-main" tabindex="-1">
-      <div class="container-xl mx-auto px-3 px-md-4 py-4 py-md-5">
+      <nav class="crumbs" aria-label="Breadcrumb" data-pagefind-ignore>
+        <a href={`${import.meta.env.BASE_URL}docs/get-started/installation/`}>Docs</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{section}</span>
+        {editUrl && <a class="ml-auto d-none d-sm-inline-flex" href={editUrl} target="_blank" rel="noopener noreferrer"><Icon name="pencil" />Edit on GitHub</a>}
+      </nav>
+      <div class="px-3 px-md-5 py-4 py-md-5">
         <div class="d-lg-flex" style="gap: var(--base-size-32)">
           <div class="flex-1 min-width-0" style="min-width: 0; max-width: 56rem">
             <article class="markdown-body" data-pagefind-body data-pagefind-meta={`section:${section}`}>
@@ -47,20 +53,21 @@ const editUrl = currentSlug
             )}
 
             {(prevPage || nextPage) && (
-              <nav class="mt-5 pt-4 border-top d-flex flex-justify-between" style="gap: var(--base-size-16)" aria-label="Page navigation" data-pagefind-ignore>
+              <nav class="pager mt-5" aria-label="Page navigation" data-pagefind-ignore>
                 {prevPage ? (
-                  <a href={`${import.meta.env.BASE_URL}docs/${prevPage.slug}/`} class="btn" rel="prev">
-                    <Icon name="arrow-left" class="mr-2" />{prevPage.title}
+                  <a href={`${import.meta.env.BASE_URL}docs/${prevPage.slug}/`} rel="prev">
+                    <span>Previous</span>
+                    <strong><Icon name="arrow-left" class="mr-1" />{prevPage.title}</strong>
                   </a>
                 ) : <span />}
                 {nextPage && (
-                  <a href={`${import.meta.env.BASE_URL}docs/${nextPage.slug}/`} class="btn ml-auto" rel="next">
-                    {nextPage.title}<Icon name="arrow-right" class="ml-2" />
+                  <a href={`${import.meta.env.BASE_URL}docs/${nextPage.slug}/`} rel="next" class="next">
+                    <span>Next</span>
+                    <strong>{nextPage.title}<Icon name="arrow-right" class="ml-1" /></strong>
                   </a>
                 )}
               </nav>
             )}
-
             {editUrl && (
               <div class="mt-4 pt-3 border-top" data-pagefind-ignore>
                 <a
@@ -75,7 +82,7 @@ const editUrl = currentSlug
             )}
           </div>
 
-          <aside class="d-none d-lg-block flex-shrink-0" style="width: 14rem" aria-label="Table of contents" data-pagefind-ignore>
+          <aside class="d-none d-lg-block flex-shrink-0" style="width: 15rem" aria-label="Table of contents" data-pagefind-ignore>
             <TableOfContents />
           </aside>
         </div>

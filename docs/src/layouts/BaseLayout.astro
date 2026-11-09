@@ -11,7 +11,10 @@ import '@primer/primitives/dist/css/functional/themes/light.css';
 import '@primer/primitives/dist/css/functional/themes/dark.css';
 import '@primer/css/dist/core.css';
 import '@primer/css/dist/markdown.css';
+import '@fontsource-variable/mona-sans';
 import '../styles/site.css';
+import '../styles/brand.css';
+import '../styles/blog.css';
 const { title, description = 'Squad — Your AI Development Team. Describe what you\'re building. Get a team of specialists that live in your repo.' } = Astro.props;
 const fullTitle = `${title} — Squad Docs`;
 const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
@@ -60,8 +63,19 @@ const ogImage = Astro.site ? new URL(squadLogo.src, Astro.site).href : squadLogo
     </script>
   </head>
   <body>
+    <div class="read-progress" aria-hidden="true"></div>
     <a href="#main-content" class="skip-link btn btn-primary">Skip to main content</a>
     <slot />
+    <script is:inline>
+      // Pointer-follow spotlight for card surfaces (CSS reads --mx/--my)
+      document.addEventListener('pointermove', (e) => {
+        const el = e.target instanceof Element ? e.target.closest('.cell, .post-card, .post-row') : null;
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      }, { passive: true });
+    </script>
     <script is:inline>
       function initCopyButtons() {
         document.querySelectorAll('.markdown-body pre').forEach((pre) => {
