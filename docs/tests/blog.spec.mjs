@@ -16,6 +16,20 @@ test.describe('Blog hub', () => {
     await expect(page.locator('#post-grid .post-card:visible')).toHaveCount(1);
   });
 
+  test('shows a helpful empty state with working recovery actions', async ({ page }) => {
+    await page.goto('/squad/blog/');
+    await page.locator('#post-search').fill('zzzzqx');
+    await expect(page.locator('#empty-title')).toContainText('zzzzqx');
+    await expect(page.locator('#post-grid .post-card:visible')).toHaveCount(0);
+    await page.getByRole('button', { name: 'skills', exact: true }).click();
+    await expect(page.locator('#post-search')).toHaveValue('skills');
+    await expect(page.locator('#post-grid .post-card:visible').first()).toBeVisible();
+    await page.locator('#post-search').fill('zzzzqx');
+    await page.getByRole('button', { name: 'Clear search and filters' }).click();
+    await expect(page.locator('#post-search')).toHaveValue('');
+    await expect(page.locator('#post-grid .post-card:visible')).toHaveCount(12);
+  });
+
   test('category filters narrow results and Clear filters restores them', async ({ page }) => {
     await page.goto('/squad/blog/');
     const total = await page.locator('#post-grid .post-card').count();

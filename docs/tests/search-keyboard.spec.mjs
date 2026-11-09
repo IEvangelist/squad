@@ -35,4 +35,17 @@ test.describe('Site search dialog', () => {
     await page.keyboard.press('Escape');
     await expect(page.locator('#search-modal')).toBeHidden();
   });
+
+  test('scrolling the results does not scroll the page behind the dialog', async ({ page }) => {
+    await page.goto('/squad/blog/');
+    await page.keyboard.press('Control+k');
+    await page.keyboard.type('skills');
+    await expect(page.locator('#search-results a.search-result').first()).toBeVisible({ timeout: 10_000 });
+    await page.mouse.move(640, 400);
+    await page.mouse.wheel(0, 4000);
+    await page.mouse.wheel(0, 4000);
+    await page.waitForTimeout(300);
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    await expect(page.locator('html')).toHaveCSS('overflow', 'hidden');
+  });
 });

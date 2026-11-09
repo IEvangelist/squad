@@ -52,8 +52,8 @@ html[data-color-mode][data-color-mode="dark"][data-dark-theme] {
   --button-primary-bgColor-active: #bb1c4b;
   --button-primary-borderColor-rest: rgba(255, 255, 255, 0.12);
   --button-primary-fgColor-rest: #fff;
-  --bgColor-default: #070a12;
-  --bgColor-muted: #0d121e;
+  --bgColor-default: #0b101a;
+  --bgColor-muted: #111826;
   --bgColor-inset: #04060b;
   --borderColor-default: #1f2a3f;
   --borderColor-muted: #172033;
@@ -80,8 +80,8 @@ html[data-color-mode][data-color-mode="dark"][data-dark-theme] {
     --button-primary-bgColor-active: #bb1c4b;
     --button-primary-borderColor-rest: rgba(255, 255, 255, 0.12);
     --button-primary-fgColor-rest: #fff;
-    --bgColor-default: #070a12;
-    --bgColor-muted: #0d121e;
+    --bgColor-default: #0b101a;
+    --bgColor-muted: #111826;
     --bgColor-inset: #04060b;
     --borderColor-default: #1f2a3f;
     --borderColor-muted: #172033;
@@ -98,7 +98,7 @@ html[data-color-mode][data-color-mode="dark"][data-dark-theme] {
 /* Slim, arrow-less gutters: a tone darker than the surface that fades to nothing at both ends. */
 :root {
   --scroll-gutter: color-mix(in srgb, var(--bgColor-default) 84%, #000);
-  --scroll-edge: color-mix(in srgb, var(--fgColor-default) 14%, transparent);
+  --scroll-edge: color-mix(in srgb, var(--fgColor-default) 18%, transparent);
   --scroll-thumb: color-mix(in srgb, var(--fgColor-muted) 45%, transparent);
   --scroll-thumb-hover: var(--brand-rose);
 }
@@ -480,39 +480,45 @@ a.cell:hover .round-arrow { transform: translateX(3px); color: #fff; background:
   position: fixed; inset: 0; width: 100%; max-width: none; height: 100%; max-height: none;
   margin: 0; padding: 0; border: 0; background: transparent; color: var(--fgColor-default);
 }
-.search-dialog::backdrop { background: var(--overlay-backdrop-bgColor, rgba(27, 31, 36, 0.5)); }
-.search-backdrop { display: flex; justify-content: center; align-items: flex-start; width: 100%; height: 100%; padding: 10vh var(--base-size-16) 0; }
+.search-dialog::backdrop {
+  background: var(--overlay-backdrop-bgColor, rgba(27, 31, 36, 0.5));
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+/* Lock the page behind the dialog; keep the scrollbar gutter so layout doesn't shift */
+html:has(.search-dialog[open]) { overflow: hidden; scrollbar-gutter: stable; }
+.search-backdrop { display: flex; justify-content: center; align-items: flex-start; width: 100%; height: 100%; padding: 8vh var(--base-size-16) 0; }
 .search-panel {
-  width: 100%; max-width: 40rem; overflow: hidden;
+  width: 100%; max-width: 52rem; overflow: hidden;
   background: var(--overlay-bgColor, var(--bgColor-default));
   border: var(--borderWidth-thin) solid var(--borderColor-default);
   border-radius: var(--borderRadius-large, 12px);
   box-shadow: var(--shadow-floating-large);
 }
-.search-input-row { display: flex; align-items: center; gap: var(--base-size-8); padding: var(--base-size-12); border-bottom: var(--borderWidth-thin) solid var(--borderColor-default); }
+.search-input-row { display: flex; align-items: center; gap: var(--base-size-12); padding: var(--base-size-16); border-bottom: var(--borderWidth-thin) solid var(--borderColor-default); }
 .search-input-wrap {
-  flex: 1; display: flex; align-items: center; gap: var(--base-size-8); min-width: 0; padding: 0 var(--base-size-12);
+  flex: 1; display: flex; align-items: center; gap: var(--base-size-8); min-width: 0; padding: 0 var(--base-size-16);
   background: var(--bgColor-default); border: var(--borderWidth-thin) solid var(--borderColor-default); border-radius: 6px;
 }
 .search-input-wrap:focus-within { border-color: var(--borderColor-accent-emphasis); box-shadow: inset 0 0 0 1px var(--borderColor-accent-emphasis); }
 .search-icon { color: var(--fgColor-muted); flex-shrink: 0; }
-.search-input { flex: 1; min-width: 0; padding-block: var(--base-size-8); font: inherit; font-size: 1rem; color: inherit; background: transparent; border: 0; }
+.search-input { flex: 1; min-width: 0; padding-block: var(--base-size-12); font: inherit; font-size: 1.125rem; color: inherit; background: transparent; border: 0; }
 .search-input::placeholder { color: var(--fgColor-muted); }
 .search-input:focus, .search-input:focus-visible { outline: none; }
 .search-spinner { width: 14px; height: 14px; border: 2px solid var(--borderColor-default); border-top-color: var(--fgColor-muted); border-radius: 50%; animation: spin 0.7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.search-status { padding: var(--base-size-8) var(--base-size-16); font-size: 0.75rem; color: var(--fgColor-muted); border-bottom: var(--borderWidth-thin) solid var(--borderColor-muted); }
-.search-results { max-height: min(60vh, 28rem); overflow-y: auto; padding: var(--base-size-8); }
+.search-status { padding: var(--base-size-8) var(--base-size-20, 20px); font-size: 0.8125rem; color: var(--fgColor-muted); border-bottom: var(--borderWidth-thin) solid var(--borderColor-muted); }
+.search-results { max-height: min(68vh, 36rem); overflow-y: auto; overscroll-behavior: contain; padding: var(--base-size-8) var(--base-size-12); }
 .search-results:empty { display: none; }
 .search-empty { padding: var(--base-size-8); }
 .search-none { padding: var(--base-size-32) var(--base-size-16); text-align: center; }
-.search-group-title { margin: 0; padding: var(--base-size-8) var(--base-size-8) var(--base-size-4); font-size: 0.75rem; font-weight: var(--base-text-weight-semibold); color: var(--fgColor-muted); }
+.search-group-title { margin: 0; padding: var(--base-size-8) var(--base-size-16) var(--base-size-4); font-size: 0.8125rem; font-weight: var(--base-text-weight-semibold); color: var(--fgColor-muted); }
 .search-group + .search-group { margin-top: var(--base-size-4); }
 
 .search-result {
   position: relative; display: flex; flex-direction: column; gap: 2px;
-  padding: var(--base-size-8) var(--base-size-12); border-radius: 6px; color: var(--fgColor-default); text-decoration: none;
+  padding: var(--base-size-12) var(--base-size-16); border-radius: 8px; color: var(--fgColor-default); text-decoration: none;
 }
 .search-result:hover { text-decoration: none; background: var(--bgColor-neutral-muted); }
 .search-result.is-active, .search-result:focus-visible { background: var(--bgColor-neutral-muted); outline: none; }
@@ -520,11 +526,11 @@ a.cell:hover .round-arrow { transform: translateX(3px); color: #fff; background:
   content: ""; position: absolute; left: 2px; top: 8px; bottom: 8px; width: 3px; border-radius: 4px; background: var(--borderColor-accent-emphasis);
 }
 .search-result-head { display: flex; align-items: center; gap: var(--base-size-8); min-width: 0; }
-.search-result-title { font-size: 0.875rem; font-weight: var(--base-text-weight-medium); }
+.search-result-title { font-size: 1rem; font-weight: var(--base-text-weight-medium); }
 .search-badge { padding: 0 7px; font-size: 0.75rem; font-weight: var(--base-text-weight-medium); line-height: 18px; color: var(--fgColor-muted); border: var(--borderWidth-thin) solid var(--borderColor-default); border-radius: 2em; white-space: nowrap; }
-.search-excerpt { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--fgColor-muted); font-size: 0.8125rem; line-height: 1.45; }
+.search-excerpt { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--fgColor-muted); font-size: 0.875rem; line-height: 1.5; }
 .search-excerpt mark { padding: 0; color: var(--fgColor-default); background: var(--bgColor-attention-muted); border-radius: 2px; }
-.search-path { font-size: 0.75rem; color: var(--fgColor-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.search-path { font-size: 0.8125rem; color: var(--fgColor-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .search-footer { display: flex; align-items: center; gap: var(--base-size-16); padding: var(--base-size-8) var(--base-size-16); font-size: 0.75rem; color: var(--fgColor-muted); border-top: var(--borderWidth-thin) solid var(--borderColor-default); background: var(--bgColor-muted); }
 .search-footer kbd { margin-right: 4px; }
