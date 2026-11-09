@@ -25,17 +25,28 @@ test.describe('Site search dialog', () => {
     await expect(page.locator('#search-modal')).toBeHidden();
   });
 
-  test('first Escape clears the query, second closes the dialog', async ({ page }) => {
+  test('a single Escape closes the dialog even with a query typed', async ({ page }) => {
     await page.goto('/squad/');
     await page.keyboard.press('Control+k');
     await page.keyboard.type('agent');
     await page.keyboard.press('Escape');
-    await expect(page.locator('#search-modal')).toBeVisible();
-    await expect(page.locator('#search-input')).toHaveValue('');
-    await page.keyboard.press('Escape');
     await expect(page.locator('#search-modal')).toBeHidden();
   });
 
+  test('the clear button appears with text, clears the query, and keeps the dialog open', async ({ page }) => {
+    await page.goto('/squad/');
+    await page.keyboard.press('Control+k');
+    const clear = page.getByRole('button', { name: 'Clear search' });
+    await expect(clear).toBeHidden();
+    await page.keyboard.type('agent');
+    await expect(clear).toBeVisible();
+    await clear.click();
+    await expect(page.locator('#search-input')).toHaveValue('');
+    await expect(page.locator('#search-input')).toBeFocused();
+    await expect(clear).toBeHidden();
+    await expect(page.locator('#search-modal')).toBeVisible();
+    await expect(page.getByText('Suggested')).toBeVisible();
+  });
   test('scrolling the results does not scroll the page behind the dialog', async ({ page }) => {
     await page.goto('/squad/blog/');
     await page.keyboard.press('Control+k');

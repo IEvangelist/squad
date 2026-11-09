@@ -39,6 +39,7 @@ const suggestions = [
             spellcheck="false"
           />
           <span class="search-spinner" id="search-spinner" aria-hidden="true" hidden></span>
+          <button type="button" class="search-clear" id="search-clear" aria-label="Clear search" hidden><Icon name="x" /></button>
         </div>
         <button type="button" class="btn btn-sm" id="search-close-kbd" aria-label="Esc, close search">Esc</button>
       </div>
@@ -89,7 +90,7 @@ const suggestions = [
 
   // --- DOM-dependent state, refreshed on each navigation ---
   let searchBtn, searchModal, searchBackdrop, searchInput,
-      searchResults, searchEmpty, searchCloseBtn, searchStatus, searchSpinner;
+      searchResults, searchEmpty, searchCloseBtn, searchStatus, searchSpinner, searchClear;
   let debounceTimer, searchToken = 0, activeIndex = -1;
 
   // Bound handler refs so we can removeEventListener cleanly
@@ -122,6 +123,7 @@ const suggestions = [
     if (searchEmpty) searchEmpty.hidden = false;
     if (searchStatus) searchStatus.hidden = true;
     if (searchSpinner) searchSpinner.hidden = true;
+    if (searchClear) searchClear.hidden = true;
     setActive(0);
   }
 
@@ -150,6 +152,7 @@ const suggestions = [
 
   async function performSearch() {
     const query = searchInput?.value?.trim();
+    if (searchClear) searchClear.hidden = !searchInput?.value;
     if (!query) {
       resetSearch();
       return;
@@ -240,6 +243,10 @@ const suggestions = [
     searchCloseBtn = document.getElementById('search-close-kbd');
     searchStatus = document.getElementById('search-status');
     searchSpinner = document.getElementById('search-spinner');
+    searchClear = document.getElementById('search-clear');
+    if (searchClear) {
+      searchClear.onclick = () => { resetSearch(); searchInput?.focus(); };
+    }
 
     const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
     const modifierEl = document.getElementById('search-modifier');
@@ -253,6 +260,7 @@ const suggestions = [
     _onCloseClick = () => closeSearch();
     _onDialogClose = () => resetSearch();
     _onInput = () => {
+      if (searchClear) searchClear.hidden = !searchInput.value;
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => performSearch(), 150);
     };
@@ -261,10 +269,6 @@ const suggestions = [
       else if (e.key === 'Enter') {
         const el = options()[activeIndex];
         if (el) { e.preventDefault(); el.click(); }
-      } else if (e.key === 'Escape' && searchInput.value) {
-        // First Escape clears the query; a second closes the dialog
-        e.preventDefault();
-        resetSearch();
       }
     };
     // Arrow keys move focus between result links; ArrowUp from the first returns to the input
