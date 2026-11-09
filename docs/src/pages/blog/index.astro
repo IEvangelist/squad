@@ -52,7 +52,7 @@ const count = (key: 'category' | 'author', value: string) => posts.filter((p) =>
         </label>
       </section>
 
-      <section class="band" aria-labelledby="latest-title">
+      <section class="band" id="latest-band" aria-labelledby="latest-title">
         <div class="section-head"><h2 id="latest-title">Latest</h2><span class="mono-label">Fresh from the squad</span></div>
         <div class="latest-grid">
           {latest.map((p) => (
@@ -77,6 +77,14 @@ const count = (key: 'category' | 'author', value: string) => posts.filter((p) =>
           <h2 id="all-title">All posts</h2>
           <div class="d-flex flex-items-center" style="gap: var(--base-size-16)">
             <span id="post-count" class="f6 color-fg-muted" role="status" aria-live="polite">{posts.length} posts</span>
+            <label class="d-none d-sm-flex flex-items-center f6 color-fg-muted" style="gap: var(--base-size-8)">
+              Per page
+              <select id="post-size" class="sort-select">
+                <option value="6">6</option>
+                <option value="12" selected>12</option>
+                <option value="24">24</option>
+              </select>
+            </label>
             <label class="d-flex flex-items-center f6 color-fg-muted" style="gap: var(--base-size-8)">
               Sort by
               <select id="post-sort" class="sort-select">
@@ -132,7 +140,8 @@ const count = (key: 'category' | 'author', value: string) => posts.filter((p) =>
                 </li>
               ))}
             </ul>
-            <p id="post-empty" class="empty-state" hidden>No posts match your filters.</p>
+            <p id="post-empty" class="empty-state" hidden>No posts match your search or filters.</p>
+            <nav id="post-pager" class="pager-nav" aria-label="Pagination" hidden></nav>
           </div>
         </div>
       </section>
@@ -148,42 +157,105 @@ const count = (key: 'category' | 'author', value: string) => posts.filter((p) =>
     const cards = Array.from(grid.querySelectorAll<HTMLElement>('.post-card'));
     const search = document.getElementById('post-search') as HTMLInputElement;
     const sort = document.getElementById('post-sort') as HTMLSelectElement;
+    const size = document.getElementById('post-size') as HTMLSelectElement;
     const form = document.getElementById('post-filters') as HTMLFormElement;
     const status = document.getElementById('post-count');
     const empty = document.getElementById('post-empty');
+    const pager = document.getElementById('post-pager');
+    const latest = document.getElementById('latest-band');
+    const params = new URLSearchParams(location.search);
+    let page = Math.max(1, Number(params.get('page')) || 1);
 
-    const checked = (name: string) =>
-      Array.from(form.querySelectorAll<HTMLInputElement>(`input[name="${name}"]:checked`)).map((i) => i.value);
+    const boxes = (name: string) => Array.from(form.querySelectorAll<HTMLInputElement>(`input[name="${name}"]`));
+    const checked = (name: string) => boxes(name).filter((i) => i.checked).map((i) => i.value);
 
-    function apply() {
+    // Restore state from the URL so searches and pages are shareable
+    search.value = params.get('q') ?? '';
+    sort.value = params.get('sort') === 'oldest' ? 'oldest' : 'newest';
+    if (['6', '12', '24'].includes(params.get('size') ?? '')) size.value = params.get('size')!;
+    (params.get('category') ?? '').split(',').filter(Boolean).forEach((v) => boxes('category').forEach((b) => { if (b.value === v) b.checked = true; }));
+    (params.get('author') ?? '').split(',').filter(Boolean).forEach((v) => boxes('author').forEach((b) => { if (b.value === v) b.checked = true; }));
+
+    function syncUrl(q: string, cats: string[], authors: string[]) {
+      const next = new URLSearchParams();
+      if (q) next.set('q', q);
+      if (cats.length) next.set('category', cats.join(','));
+      if (authors.length) next.set('author', authors.join(','));
+      if (sort.value !== 'newest') next.set('sort', sort.value);
+      if (size.value !== '12') next.set('size', size.value);
+      if (page > 1) next.set('page', String(page));
+      const qs = next.toString();
+      history.replaceState(history.state, '', location.pathname + (qs ? `?${qs}` : ''));
+    }
+
+    function renderPager(pages: number) {
+      if (!pager) return;
+      pager.hidden = pages <= 1;
+      pager.innerHTML = '';
+      if (pages <= 1) return;
+      const add = (label: string, target: number, opts: { current?: boolean; disabled?: boolean; aria?: string } = {}) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn btn-sm' + (opts.current ? ' btn-primary' : '');
+        b.textContent = label;
+        if (opts.aria) b.setAttribute('aria-label', opts.aria);
+        if (opts.current) b.setAttribute('aria-current', 'page');
+        if (opts.disabled) b.disabled = true;
+        b.onclick = () => {
+          page = target;
+          apply(false);
+          document.getElementById('all-title')?.scrollIntoView({ block: 'start' });
+        };
+        pager.appendChild(b);
+      };
+      add('Previous', page - 1, { disabled: page === 1, aria: 'Previous page' });
+      for (let n = 1; n <= pages; n++) add(String(n), n, { current: n === page, aria: `Page ${n}` });
+      add('Next', page + 1, { disabled: page === pages, aria: 'Next page' });
+    }
+
+    function apply(resetPage = true) {
       const q = search.value.trim().toLowerCase();
       const cats = checked('category');
       const authors = checked('author');
-      let visible = 0;
-      cards.forEach((card) => {
-        const show =
-          (!q || (card.dataset.text ?? '').includes(q)) &&
-          (!cats.length || cats.includes(card.dataset.category ?? '')) &&
-          (!authors.length || authors.includes(card.dataset.author ?? ''));
-        card.hidden = !show;
-        if (show) visible++;
-      });
+      if (resetPage) page = 1;
+
       const dir = sort.value === 'oldest' ? 1 : -1;
-      cards
-        .slice()
-        .sort((a, b) => dir * ((a.dataset.date ?? '').localeCompare(b.dataset.date ?? '')))
-        .forEach((card) => grid.appendChild(card));
-      if (status) status.textContent = `${visible} post${visible === 1 ? '' : 's'}`;
-      if (empty) empty.hidden = visible !== 0;
+      const matches = cards
+        .filter(
+          (card) =>
+            (!q || (card.dataset.text ?? '').includes(q)) &&
+            (!cats.length || cats.includes(card.dataset.category ?? '')) &&
+            (!authors.length || authors.includes(card.dataset.author ?? '')),
+        )
+        .sort((a, b) => dir * (a.dataset.date ?? '').localeCompare(b.dataset.date ?? ''));
+
+      const per = Number(size.value) || 12;
+      const pages = Math.max(1, Math.ceil(matches.length / per));
+      page = Math.min(page, pages);
+      const start = (page - 1) * per;
+      const visible = new Set(matches.slice(start, start + per));
+
+      cards.forEach((card) => { card.hidden = !visible.has(card); });
+      matches.forEach((card) => grid.appendChild(card));
+
+      if (status) {
+        status.textContent = matches.length
+          ? `Showing ${start + 1}–${start + visible.size} of ${matches.length} post${matches.length === 1 ? '' : 's'}`
+          : '0 posts';
+      }
+      if (empty) empty.hidden = matches.length !== 0;
+      // While searching or filtering, results take the place of the Latest row
+      if (latest) latest.hidden = Boolean(q || cats.length || authors.length);
+      renderPager(pages);
+      syncUrl(q, cats, authors);
     }
 
-    search.oninput = apply;
-    sort.onchange = apply;
-    form.onchange = apply;
-    form.onreset = () => setTimeout(apply);
-
-
-
+    search.oninput = () => apply();
+    sort.onchange = () => apply();
+    size.onchange = () => apply();
+    form.onchange = () => apply();
+    form.onreset = () => setTimeout(() => { search.value = ''; apply(); });
+    apply(false);
   }
 
   // Registered once: the script module only evaluates once across view transitions

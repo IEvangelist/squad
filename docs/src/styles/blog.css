@@ -106,6 +106,7 @@ a.cell:hover .cell-title .octicon, .post-card:hover .cell-title .octicon { trans
 .post-card:hover .card-title { color: var(--fgColor-accent); }
 .post-card .meta { margin-top: auto; padding-top: var(--base-size-8); }
 .post-card[hidden] { display: none !important; }
+.pager-nav { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--base-size-8); padding: var(--base-size-24); border-top: var(--borderWidth-thin) solid var(--fx-hairline); background: var(--bgColor-default); }
 .empty-state { padding: var(--base-size-64) var(--base-size-32); text-align: center; color: var(--fgColor-muted); background: var(--bgColor-default); }
 
 /* Article header + layout */

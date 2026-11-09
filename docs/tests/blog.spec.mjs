@@ -1,24 +1,48 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Blog hub', () => {
-  test('search and category filters narrow the post grid, and clearing restores it', async ({ page }) => {
+  test('search narrows the list, replaces the Latest row, and syncs to the URL', async ({ page }) => {
     await page.goto('/squad/blog/');
-    const cards = page.locator('#post-grid .post-card:visible');
-    const total = await cards.count();
-    expect(total).toBeGreaterThan(10);
+    await expect(page.locator('#latest-band')).toBeVisible();
 
     await page.locator('#post-search').fill('swe-bench');
-    await expect(cards).toHaveCount(1);
-    await expect(page.locator('#post-count')).toHaveText('1 post');
+    await expect(page.locator('#post-grid .post-card:visible')).toHaveCount(1);
+    await expect(page.locator('#post-count')).toContainText('1 post');
+    await expect(page.locator('#latest-band')).toBeHidden();
+    await expect(page).toHaveURL(/q=swe-bench/);
 
-    await page.locator('#post-search').fill('');
-    await page.getByLabel('Release', { exact: false }).first().check();
-    const filtered = await cards.count();
-    expect(filtered).toBeGreaterThan(0);
-    expect(filtered).toBeLessThan(total);
+    await page.reload();
+    await expect(page.locator('#post-search')).toHaveValue('swe-bench');
+    await expect(page.locator('#post-grid .post-card:visible')).toHaveCount(1);
+  });
 
+  test('category filters narrow results and Clear filters restores them', async ({ page }) => {
+    await page.goto('/squad/blog/');
+    const total = await page.locator('#post-grid .post-card').count();
+    await page.getByLabel('Release').check();
+    const count = await page.locator('#post-grid .post-card:visible').count();
+    expect(count).toBeGreaterThan(0);
+    expect(count).toBeLessThan(total);
     await page.getByRole('button', { name: 'Clear filters' }).click();
-    await expect(cards).toHaveCount(total);
+    await expect(page.locator('#post-grid .post-card:visible')).toHaveCount(12);
+  });
+
+  test('pagination shows 12 per page, moves between pages, and respects page size', async ({ page }) => {
+    await page.goto('/squad/blog/');
+    const visible = page.locator('#post-grid .post-card:visible');
+    await expect(visible).toHaveCount(12);
+    const firstTitle = await visible.first().locator('.card-title').innerText();
+
+    const pager = page.getByRole('navigation', { name: 'Pagination' });
+    await expect(pager.getByRole('button', { name: 'Page 1' })).toHaveAttribute('aria-current', 'page');
+    await pager.getByRole('button', { name: 'Next page' }).click();
+    await expect(pager.getByRole('button', { name: 'Page 2' })).toHaveAttribute('aria-current', 'page');
+    expect(await visible.first().locator('.card-title').innerText()).not.toBe(firstTitle);
+    await expect(page).toHaveURL(/page=2/);
+
+    await page.locator('#post-size').selectOption('24');
+    await expect(visible).toHaveCount(24);
+    await expect(page.locator('#post-count')).toContainText('Showing 1–24');
   });
 
   test('sort toggles order and "/" focuses search', async ({ page }) => {
