@@ -128,7 +128,10 @@ const suggestions = [
   }
 
   function closeSearch() {
-    if (searchModal?.open) searchModal.close();
+    if (searchModal?.open) {
+      resetSearch();
+      searchModal.close();
+    }
   }
 
   function resultLink(result) {
@@ -231,6 +234,7 @@ const suggestions = [
     if (_onInput && searchInput) searchInput.removeEventListener('input', _onInput);
     if (_onInputKey && searchInput) searchInput.removeEventListener('keydown', _onInputKey);
     if (_onDialogClose && searchModal) searchModal.removeEventListener('close', _onDialogClose);
+    if (searchModal) searchModal.removeEventListener('cancel', resetSearch);
     if (_onResultsKey && searchModal) searchModal.removeEventListener('keydown', _onResultsKey);
 
     // Re-query all DOM elements (fresh references after View Transition swap)
@@ -258,7 +262,8 @@ const suggestions = [
     // Only clicks on the backdrop itself (outside the panel) dismiss the dialog
     _onBackdropClick = (e) => { if (e.target === searchBackdrop) closeSearch(); };
     _onCloseClick = () => closeSearch();
-    _onDialogClose = () => resetSearch();
+    // The close event fires asynchronously; skip the reset if the dialog was already reopened
+    _onDialogClose = () => { if (!searchModal.open) resetSearch(); };
     _onInput = () => {
       if (searchClear) searchClear.hidden = !searchInput.value;
       clearTimeout(debounceTimer);
@@ -286,6 +291,8 @@ const suggestions = [
     searchInput?.addEventListener('input', _onInput);
     searchInput?.addEventListener('keydown', _onInputKey);
     searchModal?.addEventListener('close', _onDialogClose);
+    // Esc dispatches cancel synchronously; reset here so a quick reopen starts clean
+    searchModal?.addEventListener('cancel', resetSearch);
     searchModal?.addEventListener('keydown', _onResultsKey);
     // Suggestions are links in the initial markup; make them close the dialog on click
     options().forEach((a) => a.addEventListener('click', closeSearch));

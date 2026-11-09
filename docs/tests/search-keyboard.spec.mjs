@@ -59,4 +59,21 @@ test.describe('Site search dialog', () => {
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
     await expect(page.locator('html')).toHaveCSS('overflow', 'hidden');
   });
+
+  test('quickly reopening after Escape starts with an empty field', async ({ page }) => {
+    await page.goto('/squad/');
+    await page.keyboard.press('Control+k');
+    await page.keyboard.type('agent');
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Control+k');
+    await page.keyboard.type('worktrees');
+    await expect(page.locator('#search-input')).toHaveValue('worktrees');
+  });
+
+  test('a query with no matches shows the no-results message', async ({ page }) => {
+    await page.goto('/squad/');
+    await page.keyboard.press('Control+k');
+    await page.keyboard.type('@@@@@@');
+    await expect(page.locator('.search-none')).toContainText('No results for');
+  });
 });
