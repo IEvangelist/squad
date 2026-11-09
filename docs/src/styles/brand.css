@@ -582,3 +582,7 @@ html:has(.search-dialog[open]) { overflow: hidden; scrollbar-gutter: stable; }
 .search-clear { display: inline-flex; align-items: center; justify-content: center; width: 1.5rem; height: 1.5rem; padding: 0; color: var(--fgColor-muted); background: transparent; border: 0; border-radius: 50%; cursor: pointer; }
 .search-clear:hover { color: var(--fgColor-default); background: var(--bgColor-neutral-muted); }
 .search-clear:focus-visible { outline: 2px solid var(--focus-outlineColor); outline-offset: 1px; }
+
+/* Reserve scrollbar space so appearing/disappearing scrollbars never shift content */
+html { scrollbar-gutter: stable; }
+.docs-sidebar, .search-results, .toc { scrollbar-gutter: stable; }
