@@ -564,3 +564,17 @@ html:has(.search-dialog[open]) { overflow: hidden; scrollbar-gutter: stable; }
 .sidebar-chevron { color: var(--fgColor-muted); transition: transform 0.2s ease; }
 .sidebar-toggle[aria-expanded="false"] .sidebar-chevron { transform: rotate(-90deg); }
 @media (prefers-reduced-motion: reduce) { .sidebar-chevron { transition: none; } }
+
+/* ---------- Landing hero spacing ---------- */
+.hero-inner { padding-block: clamp(4rem, 10vw, 8rem); }
+.hero-grid { gap: clamp(3rem, 6vw, 4rem); }
+.hero-grid > div:first-child { max-width: 42rem; }
+@media (min-width: 768px) { .hero-grid > div:last-child { width: 100%; max-width: 44rem; } }
+@media (min-width: 1012px) {
+  .hero-grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); column-gap: clamp(4rem, 7vw, 7rem); }
+  .hero-grid > div:last-child { margin-inline: 0; max-width: none; }
+}
+.hero .hero-title { margin-bottom: var(--base-size-24); }
+.hero .pill { margin-bottom: var(--base-size-32); }
+.hero .f3.color-fg-muted { margin-bottom: var(--base-size-40); }
+.trust { padding-block: var(--base-size-24); }
