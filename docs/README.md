@@ -1,6 +1,6 @@
 # Squad Docs
 
-The documentation site for Squad, built with [Astro](https://astro.build/), [Tailwind CSS](https://tailwindcss.com/), and [Pagefind](https://pagefind.app/) for search.
+The documentation site for Squad, built with [Astro](https://astro.build/), [Primer](https://primer.style/) (`@primer/css` + `@primer/primitives`), and [Pagefind](https://pagefind.app/) for search.
 
 ## Prerequisites
 
@@ -78,7 +78,7 @@ docs/
 │   ├── navigation.ts        # Sidebar navigation structure
 │   ├── pages/               # Astro page routes
 │   ├── plugins/             # Remark plugins (link rewriting)
-│   └── styles/              # Global CSS (Tailwind)
+│   └── styles/              # Primer imports + token-based site CSS
 ├── public/                  # Static assets (images)
 └── dist/                    # Build output (gitignored)
 ```
@@ -103,3 +103,9 @@ Post content here.
 ```
 
 Blog posts are automatically discovered and listed on the blog index page.
+
+## Styling and accessibility
+
+- UI is built from [Primer](https://primer.style/) classes and design tokens; site-specific rules live in `src/styles/site.css` and use tokens only (no raw colors).
+- Color mode uses Primer's `data-color-mode` (`auto` by default; the toggle stores `light`/`dark` in `localStorage`).
+- `npm run test:e2e` includes axe-core WCAG A/AA checks in light and dark mode (`tests/a11y.spec.mjs`). Start `npm run preview -- --port 4321` first. The API reference specs need generated TypeDoc pages.

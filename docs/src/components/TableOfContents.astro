@@ -1,12 +1,10 @@
 ---
-// Client-side Table of Contents — reads h2/h3 from the article after render
+// Client-side table of contents: reads h2/h3 from the article after render.
 ---
 
-<nav id="toc" class="toc sticky top-8 text-sm" aria-label="On this page" data-pagefind-ignore>
-  <p class="font-semibold text-surface-700 dark:text-surface-300 mb-2 text-xs uppercase tracking-wide">On this page</p>
-  <ul id="toc-list" class="space-y-1 text-surface-500 dark:text-surface-400">
-    <!-- Populated by client script -->
-  </ul>
+<nav id="toc" class="toc f6" aria-labelledby="toc-heading" data-pagefind-ignore>
+  <p id="toc-heading" class="f6 text-bold color-fg-muted text-uppercase mb-2">On this page</p>
+  <ul id="toc-list" class="list-style-none"></ul>
 </nav>
 
 <script is:inline>
@@ -17,7 +15,7 @@
 
     const headings = Array.from(article.querySelectorAll('h2, h3'));
     if (headings.length === 0) {
-      document.getElementById('toc')?.classList.add('hidden');
+      document.getElementById('toc')?.setAttribute('hidden', '');
       return;
     }
 
@@ -33,9 +31,7 @@
       const a = document.createElement('a');
       a.href = '#' + h.id;
       a.textContent = h.textContent || '';
-      a.className = h.tagName === 'H3'
-        ? 'block pl-3 py-0.5 hover:text-squad-600 dark:hover:text-squad-400 transition-colors'
-        : 'block py-0.5 hover:text-squad-600 dark:hover:text-squad-400 transition-colors font-medium';
+      a.className = 'link-muted' + (h.tagName === 'H3' ? ' pl-3' : ' text-bold');
       li.appendChild(a);
       list.appendChild(li);
     });

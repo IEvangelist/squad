@@ -1,51 +1,43 @@
 ---
+import Icon from './Icon.astro';
 const base = import.meta.env.BASE_URL;
 ---
 
-<div class="relative" id="search-container">
-  <button
-    id="search-btn"
-    class="flex items-center gap-2 px-2 sm:px-3 py-1.5 text-sm rounded-lg border border-surface-200 dark:border-surface-700 text-surface-500 dark:text-surface-400 hover:border-surface-300 dark:hover:border-surface-600 hover:text-surface-700 dark:hover:text-surface-300 bg-surface-50 dark:bg-surface-900 transition-colors sm:min-w-[180px]"
-    aria-label="Search docs"
-  >
-    <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-    </svg>
-    <span class="hidden sm:inline">Search docs...</span>
-    <kbd class="hidden sm:inline-flex ml-auto text-xs border border-surface-300 dark:border-surface-600 rounded px-1.5 py-0.5 text-surface-400" id="search-shortcut-kbd">
-      <span class="text-xs" id="search-modifier">Ctrl+</span>K
-    </kbd>
-  </button>
-</div>
+<button
+  id="search-btn"
+  type="button"
+  class="btn btn-sm search-trigger d-flex flex-items-center"
+  aria-haspopup="dialog"
+  aria-keyshortcuts="Control+K Meta+K"
+>
+  <Icon name="search" class="mr-md-2" />
+  <span class="d-none d-md-inline color-fg-muted">Search docs...</span><span class="sr-only d-md-none">Search docs...</span>
+  <kbd class="d-none d-md-inline-block ml-auto" id="search-shortcut-kbd"><span id="search-modifier">Ctrl+</span>K</kbd>
+</button>
 
-<!-- Search modal -->
-<div id="search-modal" class="hidden fixed inset-0 z-[100]">
-  <div id="search-backdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-  <div class="relative flex justify-center pt-[10vh] px-4">
-    <div class="w-full max-w-2xl bg-white dark:bg-surface-900 rounded-xl shadow-2xl border border-surface-200 dark:border-surface-700 overflow-hidden">
-      <div class="flex items-center gap-3 px-4 border-b border-surface-200 dark:border-surface-700">
-        <svg class="w-5 h-5 shrink-0 text-surface-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
+<dialog id="search-modal" class="search-dialog" aria-label="Search documentation">
+  <div id="search-backdrop" class="search-backdrop">
+    <div class="search-panel">
+      <div class="search-input-row">
+        <Icon name="search" class="color-fg-muted" />
         <input
           id="search-input"
-          type="text"
+          type="search"
+          class="search-input"
           placeholder="Search documentation..."
-          class="flex-1 py-3 bg-transparent text-surface-900 dark:text-white placeholder-surface-400 outline-none text-base"
+          aria-label="Search documentation"
           autocomplete="off"
+          spellcheck="false"
         />
-        <kbd class="text-xs border border-surface-300 dark:border-surface-600 rounded px-1.5 py-0.5 text-surface-400 cursor-pointer" id="search-close-kbd">Esc</kbd>
+        <button type="button" class="btn btn-sm" id="search-close-kbd" aria-label="Close search">Esc</button>
       </div>
-      <div id="search-status" class="hidden px-4 py-2 text-xs text-surface-500 dark:text-surface-400 border-b border-surface-100 dark:border-surface-800"></div>
-      <div id="search-results" class="max-h-[60vh] overflow-y-auto p-2">
-        <div class="p-8 text-center text-surface-400 text-sm" id="search-empty">
-          Start typing to search...
-        </div>
+      <div id="search-status" class="px-3 py-2 f6 color-fg-muted border-bottom" role="status" hidden></div>
+      <div id="search-results" class="search-results">
+        <div class="p-5 text-center color-fg-muted" id="search-empty">Start typing to search...</div>
       </div>
-
     </div>
   </div>
-</div>
+</dialog>
 
 <script define:vars={{ base }}>
   // Pagefind instance persists across View Transitions - no need to re-import
@@ -58,59 +50,65 @@ const base = import.meta.env.BASE_URL;
     return pagefind;
   }
 
-  // Section badge color mapping (static, no DOM dependency)
+  // Section badges use Primer color utilities (static, no DOM dependency)
   const SECTION_COLORS = {
-    'Get Started': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-    'Guide': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-    'Features': 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-    'Reference': 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
-    'Scenarios': 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400',
-    'Concepts': 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400',
-    'Cookbook': 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
-    'Blog': 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400',
+    'Get Started': 'color-bg-success-emphasis color-fg-on-emphasis',
+    'Concepts': 'color-bg-danger-emphasis color-fg-on-emphasis',
+    'Core Features': 'color-bg-done-emphasis color-fg-on-emphasis',
+    'Advanced Features': 'color-bg-sponsors-emphasis color-fg-on-emphasis',
+    'Infrastructure': 'color-bg-severe-emphasis color-fg-on-emphasis',
+    'Guides': 'color-bg-accent-emphasis color-fg-on-emphasis',
+    'Security': 'color-bg-attention-emphasis color-fg-on-emphasis',
+    'Scenarios': 'color-bg-accent-emphasis color-fg-on-emphasis',
+    'Reference': 'color-bg-attention-emphasis color-fg-on-emphasis',
+    'Blog': 'color-bg-subtle color-fg-default border',
   };
+
+
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
 
   function getSectionBadge(section) {
     if (!section) return '';
-    const colors = SECTION_COLORS[section] || 'bg-surface-100 text-surface-700 dark:bg-surface-800 dark:text-surface-300';
-    return `<span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium ${colors}">${section}</span>`;
+    const colors = SECTION_COLORS[section] || 'color-bg-subtle color-fg-default border';
+    return `<span class="search-badge d-inline-flex f6 text-bold px-2 rounded-2 ${colors}">${escapeHtml(section)}</span>`;
   }
 
   // --- DOM-dependent state, refreshed on each navigation ---
   let searchBtn, searchModal, searchBackdrop, searchInput,
-      searchResults, searchEmpty, searchCloseKbd, searchStatus;
+      searchResults, searchEmpty, searchCloseBtn, searchStatus;
   let debounceTimer;
 
   // Bound handler refs so we can removeEventListener cleanly
-  let _onBtnClick, _onBackdropClick, _onCloseKbdClick, _onInput;
+  let _onBtnClick, _onBackdropClick, _onCloseClick, _onInput, _onDialogClose;
 
   function openSearch() {
-    searchModal?.classList.remove('hidden');
+    if (!searchModal || searchModal.open) return;
+    searchModal.showModal();
     searchInput?.focus();
-    document.body.style.overflow = 'hidden';
+  }
+
+  function resetSearch() {
+    if (searchInput) searchInput.value = '';
+    if (searchResults) {
+      searchResults.innerHTML = '';
+      if (searchEmpty) {
+        searchEmpty.textContent = 'Start typing to search...';
+        searchResults.appendChild(searchEmpty);
+      }
+    }
+    if (searchStatus) searchStatus.hidden = true;
   }
 
   function closeSearch() {
-    searchModal?.classList.add('hidden');
-    if (searchInput) searchInput.value = '';
-    if (searchResults) searchResults.innerHTML = '';
-    if (searchEmpty) {
-      searchResults?.appendChild(searchEmpty);
-      searchEmpty.textContent = 'Start typing to search...';
-    }
-    searchStatus?.classList.add('hidden');
-    document.body.style.overflow = '';
+    if (searchModal?.open) searchModal.close();
   }
 
   async function performSearch() {
     const query = searchInput?.value?.trim();
     if (!query) {
-      if (searchResults && searchEmpty) {
-        searchResults.innerHTML = '';
-        searchEmpty.textContent = 'Start typing to search...';
-        searchResults.appendChild(searchEmpty);
-      }
-      searchStatus?.classList.add('hidden');
+      resetSearch();
       return;
     }
 
@@ -124,37 +122,38 @@ const base = import.meta.env.BASE_URL;
 
       if (results.length === 0) {
         const noResults = document.createElement('div');
-        noResults.className = 'p-8 text-center text-surface-400 text-sm';
+        noResults.className = 'p-5 text-center color-fg-muted';
         noResults.textContent = `No results for "${query}"`;
         searchResults.appendChild(noResults);
-        searchStatus?.classList.add('hidden');
+        if (searchStatus) searchStatus.hidden = true;
         return;
       }
 
       if (searchStatus) {
         searchStatus.textContent = `${search.results.length} result${search.results.length === 1 ? '' : 's'}`;
-        searchStatus.classList.remove('hidden');
+        searchStatus.hidden = false;
       }
 
       results.forEach((result) => {
         const section = result.meta?.section || '';
         const a = document.createElement('a');
         a.href = result.url;
-        a.className = 'block px-3 py-2.5 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors group';
+        a.className = 'search-result';
+        // Pagefind excerpts contain trusted <mark> highlights generated from indexed content
         a.innerHTML = `
-          <div class="flex items-center gap-2">
-            <span class="font-medium text-base text-surface-900 dark:text-white group-hover:text-squad-600 dark:group-hover:text-squad-400 transition-colors">${result.meta?.title || 'Untitled'}</span>
+          <div class="d-flex flex-items-center" style="gap: var(--base-size-8)">
+            <span class="search-result-title">${escapeHtml(result.meta?.title || 'Untitled')}</span>
             ${getSectionBadge(section)}
           </div>
-          <div class="text-sm text-surface-500 dark:text-surface-400 mt-0.5 line-clamp-2">${result.excerpt || ''}</div>
+          <div class="search-excerpt mt-1">${result.excerpt || ''}</div>
         `;
-        // Close modal on click - navigation proceeds via View Transitions
+        // Close dialog on click - navigation proceeds via View Transitions
         a.addEventListener('click', closeSearch);
         searchResults.appendChild(a);
       });
     } catch {
       if (searchResults) {
-        searchResults.innerHTML = '<div class="p-8 text-center text-surface-400 text-sm">Search index loading...</div>';
+        searchResults.innerHTML = '<div class="p-5 text-center color-fg-muted">Search index loading...</div>';
       }
     }
   }
@@ -164,24 +163,23 @@ const base = import.meta.env.BASE_URL;
   function handleGlobalKeydown(e) {
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
       e.preventDefault();
-      if (searchModal?.classList.contains('hidden')) {
-        openSearch();
-      } else {
+      if (searchModal?.open) {
         closeSearch();
+      } else {
+        openSearch();
       }
     }
-    if (e.key === 'Escape') closeSearch();
   }
 
   function initSearch() {
-    // Cancel any in-flight debounce from the previous page
     clearTimeout(debounceTimer);
 
     // Tear down old element listeners (old refs may be detached)
     if (_onBtnClick && searchBtn) searchBtn.removeEventListener('click', _onBtnClick);
     if (_onBackdropClick && searchBackdrop) searchBackdrop.removeEventListener('click', _onBackdropClick);
-    if (_onCloseKbdClick && searchCloseKbd) searchCloseKbd.removeEventListener('click', _onCloseKbdClick);
+    if (_onCloseClick && searchCloseBtn) searchCloseBtn.removeEventListener('click', _onCloseClick);
     if (_onInput && searchInput) searchInput.removeEventListener('input', _onInput);
+    if (_onDialogClose && searchModal) searchModal.removeEventListener('close', _onDialogClose);
 
     // Re-query all DOM elements (fresh references after View Transition swap)
     searchBtn = document.getElementById('search-btn');
@@ -190,20 +188,20 @@ const base = import.meta.env.BASE_URL;
     searchInput = document.getElementById('search-input');
     searchResults = document.getElementById('search-results');
     searchEmpty = document.getElementById('search-empty');
-    searchCloseKbd = document.getElementById('search-close-kbd');
+    searchCloseBtn = document.getElementById('search-close-kbd');
     searchStatus = document.getElementById('search-status');
 
-    // Detect OS and update shortcut badge
     const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
     const modifierEl = document.getElementById('search-modifier');
     if (modifierEl) {
       modifierEl.textContent = isMac ? 'Cmd+' : 'Ctrl+';
     }
 
-    // Create fresh bound handlers
     _onBtnClick = () => openSearch();
-    _onBackdropClick = () => closeSearch();
-    _onCloseKbdClick = () => closeSearch();
+    // Only clicks on the backdrop itself (outside the panel) dismiss the dialog
+    _onBackdropClick = (e) => { if (e.target === searchBackdrop) closeSearch(); };
+    _onCloseClick = () => closeSearch();
+    _onDialogClose = () => resetSearch();
     _onInput = () => {
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => performSearch(), 200);
@@ -211,10 +209,10 @@ const base = import.meta.env.BASE_URL;
 
     searchBtn?.addEventListener('click', _onBtnClick);
     searchBackdrop?.addEventListener('click', _onBackdropClick);
-    searchCloseKbd?.addEventListener('click', _onCloseKbdClick);
+    searchCloseBtn?.addEventListener('click', _onCloseClick);
     searchInput?.addEventListener('input', _onInput);
+    searchModal?.addEventListener('close', _onDialogClose);
 
-    // Register global keydown exactly once
     if (!_globalKeydownRegistered) {
       document.addEventListener('keydown', handleGlobalKeydown);
       _globalKeydownRegistered = true;

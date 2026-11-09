@@ -9,79 +9,61 @@ const { currentSlug = '' } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
 
-<aside
-  id="sidebar"
-  class="fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-surface-950 border-r border-surface-200 dark:border-surface-800 transform -translate-x-full lg:translate-x-0 lg:static lg:z-auto transition-transform duration-200 ease-in-out overflow-y-auto pt-14 lg:pt-0 lg:h-[calc(100vh-3.5rem)] lg:sticky lg:top-14 lg:shrink-0"
-  data-pagefind-ignore
->
-  <div class="p-4 space-y-6">
+<aside id="sidebar" class="docs-sidebar" aria-label="Documentation" data-pagefind-ignore>
+  <div class="p-3">
     {NAV_SECTIONS.map((section) => (
-      <div>
-        <h3 class="text-sm font-bold uppercase tracking-wider text-surface-600 dark:text-surface-300 mb-2 px-3">
+      <nav class="mb-4" data-pagefind-ignore aria-labelledby={`nav-${section.dir}`}>
+        <h2 id={`nav-${section.dir}`} class="f6 text-bold color-fg-muted text-uppercase px-3 mb-1">
           {section.title}
-        </h3>
-        <ul class="space-y-0.5">
+        </h2>
+        <ul class="SideNav list-style-none">
           {section.items.map((item) => (
             <li>
               <a
                 href={`${base}docs/${item.slug}/`}
-                class:list={[
-                  'sidebar-link',
-                  { active: currentSlug === item.slug },
-                ]}
+                class="SideNav-item"
+                aria-current={currentSlug === item.slug ? 'page' : undefined}
               >
                 {item.title}
               </a>
             </li>
           ))}
         </ul>
-      </div>
+      </nav>
     ))}
 
-    <div class="border-t border-surface-200 dark:border-surface-800 pt-4">
-      <ul class="space-y-0.5">
+    <nav class="border-top pt-3" data-pagefind-ignore aria-label="More documentation">
+      <ul class="SideNav list-style-none">
         {STANDALONE_PAGES.map((page) => (
           <li>
             <a
               href={`${base}docs/${page.slug}/`}
-              class:list={[
-                'sidebar-link',
-                { active: currentSlug === page.slug },
-              ]}
+              class="SideNav-item"
+              aria-current={currentSlug === page.slug ? 'page' : undefined}
             >
               {page.title}
             </a>
           </li>
         ))}
       </ul>
-    </div>
+    </nav>
   </div>
 </aside>
 
-<!-- Overlay for mobile -->
-<div id="sidebar-overlay" class="fixed inset-0 z-40 bg-black/50 hidden lg:hidden"></div>
+<div id="sidebar-overlay" class="sidebar-overlay" hidden></div>
 
 <script>
   const SIDEBAR_SCROLL_KEY = 'squad-docs-sidebar-scroll';
 
-  function getSidebarElements() {
-    return {
-      sidebar: document.getElementById('sidebar'),
-      overlay: document.getElementById('sidebar-overlay'),
-    };
-  }
-
-  function closeSidebar() {
-    const { sidebar, overlay } = getSidebarElements();
-    sidebar?.classList.add('-translate-x-full');
-    overlay?.classList.add('hidden');
+  function getSidebar() {
+    return document.getElementById('sidebar');
   }
 
   let lastScrollTop = 0;
   let rafPending = false;
 
   function trackSidebarScroll() {
-    const { sidebar } = getSidebarElements();
+    const sidebar = getSidebar();
     if (!sidebar) return;
 
     if (!rafPending) {
@@ -94,7 +76,7 @@ const base = import.meta.env.BASE_URL;
   }
 
   function flushSidebarScroll() {
-    const { sidebar } = getSidebarElements();
+    const sidebar = getSidebar();
     if (sidebar) {
       lastScrollTop = sidebar.scrollTop;
     }
@@ -102,7 +84,7 @@ const base = import.meta.env.BASE_URL;
   }
 
   function restoreSidebarScroll() {
-    const { sidebar } = getSidebarElements();
+    const sidebar = getSidebar();
     if (!sidebar) return false;
 
     const savedScrollTop = sessionStorage.getItem(SIDEBAR_SCROLL_KEY);
@@ -117,7 +99,7 @@ const base = import.meta.env.BASE_URL;
   }
 
   function initSidebar() {
-    const { sidebar, overlay } = getSidebarElements();
+    const sidebar = getSidebar();
     if (!sidebar) return;
 
     if (!sidebar.dataset.scrollPersistenceBound) {
@@ -125,16 +107,11 @@ const base = import.meta.env.BASE_URL;
       sidebar.dataset.scrollPersistenceBound = 'true';
     }
 
-    if (overlay && !overlay.dataset.closeHandlerBound) {
-      overlay.addEventListener('click', closeSidebar);
-      overlay.dataset.closeHandlerBound = 'true';
-    }
-
     requestAnimationFrame(() => {
       const restoredScroll = restoreSidebarScroll();
       if (restoredScroll) return;
 
-      const activeLink = sidebar.querySelector('.sidebar-link.active');
+      const activeLink = sidebar.querySelector('[aria-current="page"]');
       activeLink?.scrollIntoView({ block: 'center', behavior: 'instant' });
     });
   }
