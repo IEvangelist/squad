@@ -4,6 +4,8 @@ import Header from '../components/Header.astro';
 import Sidebar from '../components/Sidebar.astro';
 import Footer from '../components/Footer.astro';
 import Icon from '../components/Icon.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { docsCrumbs } from '../lib/breadcrumbs';
 import TableOfContents from '../components/TableOfContents.astro';
 import { NAV_SECTIONS } from '../navigation';
 
@@ -23,6 +25,8 @@ const sectionDir = currentSlug?.split('/')[0] || '';
 const navSection = NAV_SECTIONS.find(s => s.dir === sectionDir);
 const section = navSection?.title || 'Docs';
 
+const crumbs = docsCrumbs(currentSlug ?? '', title, import.meta.env.BASE_URL);
+
 const editUrl = currentSlug
   ? `https://github.com/github/squad/edit/dev/docs/src/content/docs/${currentSlug}.md`
   : null;
@@ -33,12 +37,9 @@ const editUrl = currentSlug
   <div class="docs-layout">
     <Sidebar currentSlug={currentSlug} />
     <main id="main-content" class="docs-main" tabindex="-1">
-      <nav class="crumbs" aria-label="Breadcrumb" data-pagefind-ignore>
-        <a href={`${import.meta.env.BASE_URL}docs/get-started/installation/`}>Docs</a>
-        <span aria-hidden="true">/</span>
-        <span aria-current="page">{section}</span>
-        {editUrl && <a class="ml-auto d-none d-sm-inline-flex" href={editUrl} target="_blank" rel="noopener noreferrer"><Icon name="pencil" />Edit on GitHub</a>}
-      </nav>
+      <Breadcrumbs crumbs={crumbs}>
+        {editUrl && <a class="crumb-action d-none d-sm-inline-flex" href={editUrl} target="_blank" rel="noopener noreferrer"><Icon name="pencil" />Edit on GitHub</a>}
+      </Breadcrumbs>
       <div class="px-3 px-md-5 py-4 py-md-5">
         <div class="d-lg-flex" style="gap: var(--base-size-32)">
           <div class="flex-1 min-width-0" style="min-width: 0; max-width: 56rem">

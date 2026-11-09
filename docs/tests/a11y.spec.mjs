@@ -128,3 +128,36 @@ test.describe('docs pager', () => {
     expect(lw).toBeGreaterThan(pw - 4);
   });
 });
+
+test.describe('breadcrumbs', () => {
+  const trail = (page) => page.locator('nav[aria-label="Breadcrumb"] li').allInnerTexts();
+
+  test('sidebar pages show Docs > section > page matching the sidebar', async ({ page }) => {
+    await page.goto('/squad/docs/features/skills/');
+    expect(await trail(page)).toEqual(['Docs', 'Core Features', 'Skills']);
+    await expect(page.locator('nav[aria-label="Breadcrumb"] [aria-current="page"]')).toHaveText('Skills');
+    await page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', { name: 'Core Features' }).click();
+    await page.waitForURL(/features\/team-setup/);
+  });
+
+  test('pages outside the sidebar but inside a section keep a sensible trail', async ({ page }) => {
+    await page.goto('/squad/docs/features/cleanup/');
+    const items = await trail(page);
+    expect(items.slice(0, 2)).toEqual(['Docs', 'Features']);
+    expect(items).toHaveLength(3);
+  });
+
+  test('root-level pages with no section render no breadcrumb', async ({ page }) => {
+    await page.goto('/squad/docs/whatsnew/');
+    await expect(page.locator('nav[aria-label="Breadcrumb"]')).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'Edit on GitHub' })).toBeVisible();
+  });
+
+  test('blog posts show Squad Blog > category > title', async ({ page }) => {
+    await page.goto('/squad/blog/004-v020-release/');
+    expect(await trail(page)).toEqual(['Squad Blog', 'Release', 'v0.2.0: Your Squad Comes With You']);
+    await page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', { name: 'Release' }).click();
+    await page.waitForURL(/blog\/\?category=Release/);
+    await expect(page.getByRole('checkbox', { name: 'Release' })).toBeChecked();
+  });
+});

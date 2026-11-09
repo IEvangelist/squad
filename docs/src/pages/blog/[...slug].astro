@@ -3,7 +3,7 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
-import Icon from '../../components/Icon.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import TableOfContents from '../../components/TableOfContents.astro';
 import { categoryOf, cleanAuthor, formatDate, titleFromId, toDate } from '../../lib/blog';
 
@@ -24,6 +24,11 @@ const title = entry.data.title || titleFromId(entry.id);
 const lead = entry.data.hero || entry.data.description || '';
 const date = toDate(entry.data.date);
 const category = categoryOf(entry.data.tags);
+const crumbs = [
+  { label: 'Squad Blog', href: `${base}blog/` },
+  { label: category, href: `${base}blog/?category=${category}` },
+  { label: title },
+];
 const tags = (entry.data.tags ?? []).filter((t) => t !== 'squad' && t.toLowerCase() !== category.toLowerCase()).slice(0, 4);
 ---
 
@@ -31,11 +36,7 @@ const tags = (entry.data.tags ?? []).filter((t) => t !== 'squad' && t.toLowerCas
   <Header />
   <main id="main-content" tabindex="-1">
     <div class="frame">
-      <nav class="crumbs" aria-label="Breadcrumb" data-pagefind-ignore>
-        <a href={`${base}blog/`}><Icon name="arrow-left" />Squad Blog</a>
-        <span aria-hidden="true">/</span>
-        <span aria-current="page">{title}</span>
-      </nav>
+      <Breadcrumbs crumbs={crumbs} />
 
       <header class="article-hero">
         <div class="fx-grid" aria-hidden="true"></div>

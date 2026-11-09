@@ -223,3 +223,14 @@ html[data-color-mode][data-color-mode="dark"] .chip-new { color: #3fe06c; backgr
 .chip-btn { padding: 4px 10px; font: inherit; font-size: 0.875rem; color: var(--fgColor-default); background: transparent; border: var(--borderWidth-thin) solid var(--borderColor-default); border-radius: 2em; cursor: pointer; transition: background-color 0.15s ease, border-color 0.15s ease; }
 .chip-btn:hover { background: var(--bgColor-accent-muted); border-color: var(--borderColor-accent-emphasis); }
 .chip-btn:focus-visible { outline: 2px solid var(--focus-outlineColor); outline-offset: 2px; }
+
+/* Breadcrumb trail */
+.crumbs { justify-content: space-between; min-width: 0; }
+.crumb-list { display: flex; align-items: center; gap: var(--base-size-8); min-width: 0; margin: 0; padding: 0; list-style: none; }
+.crumb { display: inline-flex; align-items: center; gap: var(--base-size-8); min-width: 0; white-space: nowrap; }
+.crumb + .crumb::before { content: "/"; color: var(--fgColor-muted); opacity: 0.7; }
+.crumb-current { min-width: 0; }
+.crumb-current > span { overflow: hidden; text-overflow: ellipsis; }
+.crumbs-actions { justify-content: flex-end; }
+.crumb-action { align-items: center; gap: var(--base-size-4); white-space: nowrap; }
+@media (max-width: 767px) { .crumbs { padding-inline: var(--base-size-16); } .crumb:not(.crumb-current):not(:first-child) { display: none; } }
